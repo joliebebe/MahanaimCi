@@ -1,0 +1,82 @@
+[
+    {
+        "id": "1",
+        "name": "Mangue séchée 1",
+        "image": "https:i.imgur.com/874YB6M.jpeg",
+        "description": "Lorem ipsum dolor",
+        "price": 2000,
+        "categories": "Produits et Marques locales",
+        "icon": "https:i.imgur.com/Pg3BB6F.jpeg",
+        "categoryId": "3",
+        "destination": "Korhogo",
+        "destinationDetails":"Pres de l'hotel I",
+        "quantity": 1
+    },
+    {
+        "id": "2",
+        "name": "Mangue séchée 2",
+        "image": "https:i.imgur.com/874YB6M.jpeg",
+        "description": "Lorem ipsum dolor",
+        "price": 500,
+        "categories": "Produits et Marques locales",
+        "icon": "https:i.imgur.com/Pg3BB6F.jpeg",
+        "categoryId": "3",
+        "destination": "Korhogo",
+        "destinationDetails":"Pres de l'hotel I",
+        "quantity": 1
+
+    },{
+        "id": "3",
+        "name": "Mangue séchée 1",
+        "image": "https:i.imgur.com/874YB6M.jpeg",
+        "description": "Lorem ipsum dolor",
+        "price": 2000,
+        "categories": "Produits et Marques locales",
+        "icon": "https:i.imgur.com/Pg3BB6F.jpeg",
+        "destination": "Yakro",
+        "categoryId": "2",
+        "destinationDetails":"Pres de l'hotel B",
+        "quantity": 1
+
+    },
+    {
+        "id": "4",
+        "name": "Mangue séchée 2",
+        "image": "https:i.imgur.com/874YB6M.jpeg",
+        "description": "Lorem ipsum dolor",
+        "price": 500,
+        "categories": "Produits et Marques locales",
+        "icon": "https:i.imgur.com/Pg3BB6F.jpeg",
+        "categoryId": "2",
+        "destination": "Yakro",
+        "destinationDetails":"Pres de l'hotel B",
+        "quantity": 1
+
+    },{
+        "id": "5",
+        "name": "Mangue séchée 1",
+        "image": "https:i.imgur.com/874YB6M.jpeg",
+        "description": "Lorem ipsum dolor",
+        "price": 2000,
+        "categories": "Produits et Marques locales",
+        "icon": "https:i.imgur.com/Pg3BB6F.jpeg",
+        "categoryId": "1",
+        "destination": "Ferké",
+        "quantity": 1,
+        "destinationDetails":"Pres de l'hotel H"
+    },
+    {
+        "id": "6",
+        "name": "Mangue séchée 2",
+        "image": "https:i.imgur.com/874YB6M.jpeg",
+        "description": "Lorem ipsum dolor",
+        "price": 500,
+        "categories": "Produits et Marques locales",
+        "icon": "https:i.imgur.com/Pg3BB6F.jpeg",
+        "categoryId": "1",
+        "destination": "Ferké",
+        "quantity": 1,
+        "destinationDetails":"Pres de l'hotel H"
+
+    }
+]

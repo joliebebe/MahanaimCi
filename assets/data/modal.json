@@ -1,0 +1,18 @@
+[
+    {
+        "id": "1",
+        "name":"ELECTRICITÉ BATIMENT",
+        "image":"https:i.imgur.com/bvKS0Jp.jpeg",
+        "place": "4/5 sur 250 avis",
+        "description": "Description du lieu ici. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis nec commodo lectus.Description du lieu ici. Lorem ipsum dolor sit amet,consectetur adipiscing elit. Duis nec commodo lectus",
+        "price": "150 Prof/30 villes"
+    },
+    {
+        "id": "2",
+        "name":"PEINTRE BATIMENT",
+        "image":"https:i.imgur.com/dGFOcWx.jpeg",
+        "place":"5/5 sur 500 avis",
+        "description": "Description du lieu ici. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis nec commodo lectus.Description du lieu ici. Lorem ipsum dolor sit amet,consectetur adipiscing elit.Lorem ipsum dolor",
+        "price": "50 Prof/3 villes"
+    }
+]
