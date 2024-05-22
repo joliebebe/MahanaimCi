@@ -16,9 +16,10 @@ const Listings = ({ listings, selectedCategory }: Props) => {
   useEffect(() => {
     setIsLoading(true);  // Start loading
     setTimeout(() => {  // Simulate a network request or any async operation
-      if (selectedCategory) {
+      if (selectedCategory && selectedCategory.id) {
         const filtered = listings.filter(item => item.categoryId === selectedCategory.id);
-        setFilteredListings(filtered);
+        setFilteredListings('filtre', filtered);
+        console.log(setFilteredListings);
       } else {
         setFilteredListings(listings);
       }

@@ -1,18 +1,17 @@
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import React, { useRef, useState } from 'react';
-import CategoriesDetails from '@/assets/data/categoryDetails';
-import listingsData from '@/assets/data/details.json';
 import Listings from './Listings';
 
 type Props = {
     onCategoryDetailsChange: (CategoriesDetails: any, category: any) => void;
+    CategoriesDetails: any[];
 };
 
-const CategoryDetailsButtons = ({ onCategoryDetailsChange }: Props) => {
+const CategoryDetailsButtons = ({ onCategoryDetailsChange, CategoriesDetails }: Props) => {
     const scrollRef = useRef<ScrollView>(null);
     const itemRef = useRef<TouchableOpacity[] | null[]>([]);
     const [activeIndex, setActiveIndex] = useState(0);
-    const [selectedCategory, setSelectedCategory] = useState(CategoriesDetails[0]);
+    const [selectedCategory, setSelectedCategory] = useState(CategoriesDetails[0] || {});
 
     const handleSelectCategory = (index: number) => {
         const selected = itemRef.current[index];
@@ -25,20 +24,17 @@ const CategoryDetailsButtons = ({ onCategoryDetailsChange }: Props) => {
 
         const category = CategoriesDetails[index];
         setSelectedCategory(category);
-        console.log("Selected category:", category.destination);
         onCategoryDetailsChange(category, category.destination);
+        console.log('category',category);
     };
-
+console.log('handleSelectCategory',handleSelectCategory);
     return (
         <View style={styles.container}>
             <ScrollView
                 ref={scrollRef}
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{
-                    gap: 25,
-                    marginBottom: 10,
-                }}
+                contentContainerStyle={{ gap: 25, marginBottom: 10 }}
             >
                 {CategoriesDetails.map((item, index) => (
                     <TouchableOpacity
@@ -54,7 +50,7 @@ const CategoryDetailsButtons = ({ onCategoryDetailsChange }: Props) => {
                 ))}
             </ScrollView>
             {/* Passer la catégorie sélectionnée à Listings */}
-            <Listings listings={listingsData} selectedCategory={selectedCategory} />
+            <Listings listings={selectedCategory.listings || []} selectedCategory={selectedCategory} />
         </View>
     );
 };

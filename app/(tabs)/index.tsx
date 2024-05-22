@@ -1,8 +1,8 @@
 import { StyleSheet, Text, TouchableOpacity, View, Image, TextInput, ScrollView, ListRenderItem, FlatList } from 'react-native'
-import React, { useState } from 'react'
-import { Link, Stack } from 'expo-router'
-import { useHeaderHeight } from '@react-navigation/elements'
-import Colors from '@/constants/Colors'
+import React, { useState } from 'react';
+import { Link, Stack } from 'expo-router';
+import { useHeaderHeight } from '@react-navigation/elements';
+import Colors from '@/constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import CategoryButtons from '../../components/CategoryButtons'
@@ -26,19 +26,18 @@ const Page = () => {
     const onCatChanged = (category: string) => {
         console.log("console category:", category);
         setCategory(category);
-         // Logique de traitement du clic sur le bouton de catégorie
-         setShowDropdown(true); // Met à jour l'état pour afficher le DropdownList
-         //console.log("set",setShowDropdown)
+        // Logique de traitement du clic sur le bouton de catégorie
+        setShowDropdown(true); // Met à jour l'état pour afficher le DropdownList
+        //console.log("set",setShowDropdown)
 
     };
-   
 
     const [selectedOption, setSelectedOption] = useState('SOUMARA');
     const [showDropdown, setShowDropdown] = useState(false);
 
     const handleCategorySelect = (CategoriesProd: any) => {
         console.log("Catégorie sélectionnée :", CategoriesProd);
-        setSelectedOption("CategoriesProd:",CategoriesProd);
+        setSelectedOption("CategoriesProd:", CategoriesProd);
     };
 
     const renderItems: ListRenderItem<modalType> = ({ item }) => {
@@ -59,22 +58,30 @@ const Page = () => {
         );
     };
 
-       // Filtrer les listings en fonction de la catégorie sélectionnée
-       const filteredDetails = listingsData.filter(item => item.categories === category);
+    // Filtrer les listings en fonction de la catégorie sélectionnée
+    const filteredDetails = listingsData.filter(item => item.categories === category);
 
 
     return (
-        <SafeAreaProvider>
-            <ScrollView>
-                <>
+        <>
+            <Stack.Screen
+                options={{
+                    headerTransparent: true,
+                    headerTitle: "",
+                }}
+            />
+            <SafeAreaProvider>
+                <ScrollView>
+
                     <LinearGradient
                         colors={["#FFFFFF", Colors.bgColorspage]}
                         start={{ x: 0, y: 1 }}
                         end={{ x: 1, y: 1 }}
-                        style={[styles.container, { paddingTop: headerHeight }]}
+                        style={[styles.container,]}
                     >
+
                         <View >
-                            <View style={{ margin: 5, marginHorizontal: 15, paddingTop: 12 }}>
+                            <View style={{ margin: 5, marginHorizontal: 15, paddingTop: 25, }}>
                                 <Text style={styles.titre}>
                                     Akwaba, <Text style={styles.titre}>N'Guess</Text>
                                 </Text>
@@ -82,7 +89,7 @@ const Page = () => {
 
                             <View style={{ flexDirection: 'row', marginHorizontal: 15, alignItems: 'center' }}>
                                 <View style={{ flex: 1, }}>
-                                    <Text style={styles.titre} >Bienvenue sur le marché{'\n'}MAHANAIIM.CI</Text>
+                                    <Text style={styles.titre} >Bienvenue {'\n'}sur le marché{'\n'}MAHANAIIM.CI</Text>
                                 </View>
                                 <View style={styles.iconContainer}>
                                     <Image source={require('../../assets/images/mon-icone.png')} style={styles.icon} />
@@ -125,12 +132,9 @@ const Page = () => {
                             showsHorizontalScrollIndicator={false} />
                     </View>
 
-
-
-
-                </>
-            </ScrollView>
-        </SafeAreaProvider>
+                </ScrollView>
+            </SafeAreaProvider>
+        </>
 
     )
 }
@@ -140,8 +144,7 @@ export default Page
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingHorizontal: 20,
-
+        paddingHorizontal: 10,
     },
     iconContainer: {
         width: 40,
@@ -152,9 +155,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     icon: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
+        width: 70,
+        height: 70,
+        borderRadius: 35,
     },
     container1: {
         flex: 1,

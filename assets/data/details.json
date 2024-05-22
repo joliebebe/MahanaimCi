@@ -10,7 +10,8 @@
         "categoryId": "3",
         "destination": "Korhogo",
         "destinationDetails":"Pres de l'hotel I",
-        "quantity": 1
+        "quantity": 1, 
+        "categoryProd":"MANGUE SECHÉE"
     },
     {
         "id": "2",
@@ -23,7 +24,8 @@
         "categoryId": "3",
         "destination": "Korhogo",
         "destinationDetails":"Pres de l'hotel I",
-        "quantity": 1
+        "quantity": 1,
+        "categoryProd":"MANGUE SECHÉE"
 
     },{
         "id": "3",
@@ -36,7 +38,8 @@
         "destination": "Yakro",
         "categoryId": "2",
         "destinationDetails":"Pres de l'hotel B",
-        "quantity": 1
+        "quantity": 1,
+        "categoryProd":"MANGUE SECHÉE"
 
     },
     {
@@ -50,7 +53,8 @@
         "categoryId": "2",
         "destination": "Yakro",
         "destinationDetails":"Pres de l'hotel B",
-        "quantity": 1
+        "quantity": 1,
+        "categoryProd":"MANGUE SECHÉE"
 
     },{
         "id": "5",
@@ -63,7 +67,8 @@
         "categoryId": "1",
         "destination": "Ferké",
         "quantity": 1,
-        "destinationDetails":"Pres de l'hotel H"
+        "destinationDetails":"Pres de l'hotel H",
+        "categoryProd":"MANGUE SECHÉE"
     },
     {
         "id": "6",
@@ -76,7 +81,38 @@
         "categoryId": "1",
         "destination": "Ferké",
         "quantity": 1,
-        "destinationDetails":"Pres de l'hotel H"
+        "destinationDetails":"Pres de l'hotel H",
+        "categoryProd":"MANGUE SECHÉE"
 
+    }, 
+    {
+        "id": "1",
+        "name": "Foutou à la sauce graine",
+        "image": "https://vivelacuisinedecaro.wordpress.com/wp-content/uploads/2019/03/img_1923.jpg?w=736",
+        "description": "C'est trop doux",
+        "price": 1000,
+        "categories": "Resto",
+        "icon": "https://vivelacuisinedecaro.wordpress.com/wp-content/uploads/2019/03/img_1923.jpg?w=736",
+        "categoryId": "3",
+        "destination": "Korhogo",
+        "destinationDetails":"Pres de l'hotel I",
+        "quantity": 1,
+        "categoryResto": "PLAT AFRICAIN"
+         
+    },
+    {
+        "id": "2",
+        "name": "Placali à la sauce graine",
+        "image": "https://www.cuisinedecheznous.net/wp-content/uploads/2021/01/137038069_1102250336868088_3835661635843672510_o.jpg",
+        "description": "C'est trop bon",
+        "price": 700,
+        "categories": "Resto",
+        "icon": "https://www.cuisinedecheznous.net/wp-content/uploads/2021/01/137038069_1102250336868088_3835661635843672510_o.jpg",
+        "categoryId": "3",
+        "destination": "Korhogo",
+        "destinationDetails":"Pres de l'hotel I",
+        "quantity": 1,
+        "categorie": "FAST FOOD",
+        "categoryResto": "PLAT AFRICAIN"
     }
 ]

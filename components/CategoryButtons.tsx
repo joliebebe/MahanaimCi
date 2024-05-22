@@ -17,7 +17,9 @@ const CategoryButtons = ({ onCategoryChange, setShowDropdown }: Props) => {
 
   // Extraire les catégories uniques depuis les données des listings
   const categories = Array.from(new Set(listingsData.map(item => item.categories)));
-
+  // Extraire les catégories uniques depuis les données des listings
+  //const categories = Categories.map(category => category.title);
+  
   const handleSelectCategory = (index: number) => {
     if (activeIndex === index) {
       setDropdownOpen(!dropdownOpen);
@@ -57,10 +59,14 @@ const CategoryButtons = ({ onCategoryChange, setShowDropdown }: Props) => {
         <DropdownList
           onCategoryChange={onCategoryChange}
           onCategoryProd={(categoryProd: string) => {
-            console.log(categoryProd);
+            console.log('catP',categoryProd);
+          }}
+          onCategoryResto={(categoryResto: string) => {
+            console.log('Res',categoryResto);
           }}
           selectedCategoryIndex={activeIndex}
           selectedCategoryTitle={categories[activeIndex]}
+          
         />
       )}
     </View>

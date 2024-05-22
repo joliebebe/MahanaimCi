@@ -7,5 +7,8 @@ export default {
     black:'#27283a',
     bgColorsgray:'#5b6165',
     bgColorsmenu:'#f8f8f8',
+    bgColorsGreenlight:'#fcfeed',
+    bgColorsgraylight:'#f7f3f2',
+    bgColorslink:'#949494',
 
 }

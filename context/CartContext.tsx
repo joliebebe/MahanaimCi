@@ -1,68 +1,55 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { CartItemType } from '@/types/cardItemType'; // Assurez-vous que le chemin d'importation est correct
+import { CartItemType } from '@/types/cardItemType'; // Assurez-vous que le type est défini
 
-export type CartContextType = {
+type CartContextType = {
   cart: CartItemType[];
-  addItemToCart: (item: CartItemType, quantity: number) => void; // Ajoutez addItemToCart
-  updateItemQuantity: (itemId: string, newQuantity: number) => void;
-  getTotalPrice: () => number;
+  addItemToCart: (item: CartItemType, quantity: number) => void;
+  removeItemFromCart: (itemId: string) => void;
   clearCart: () => void;
+  isCartEmpty: boolean;
 };
 
-
-const CartContext = createContext<CartContextType>({
-  cart: [],
-  updateItemQuantity: () => {},
-  getTotalPrice: () => 0,
-  clearCart: () => {},
-  addItemToCart: () => {},
-});
+const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [cart, setCart] = useState<CartItemType[]>([]); // Renommez cartItems en cart
+  const [cart, setCart] = useState<CartItemType[]>([]);
+  const [isCartEmpty, setIsCartEmpty] = useState<boolean>(true);
 
   const addItemToCart = (item: CartItemType, quantity: number) => {
-    // Vérifiez si l'article est déjà dans le panier
-    const existingItemIndex = cart.findIndex((cartItem) => cartItem.id === item.id);
-
-    if (existingItemIndex !== -1) {
-      // Si l'article existe, mettez à jour sa quantité
-      const updatedCart = [...cart];
-      updatedCart[existingItemIndex].quantity += quantity;
-      setCart(updatedCart);
-    } else {
-      // Sinon, ajoutez un nouvel article
-      setCart((prevCart) => [...prevCart, { ...item, quantity }]);
-    }
-  };
-
-  const updateItemQuantity = (itemId: string, newQuantity: number) => {
-    const updatedCart = cart.map((item) => {
-      if (item.id === itemId) {
-        return { ...item, quantity: newQuantity };
+    setCart((prevCart) => {
+      const existingItemIndex = prevCart.findIndex((cartItem) => cartItem.id === item.id);
+      if (existingItemIndex !== -1) {
+        const updatedCart = [...prevCart];
+        updatedCart[existingItemIndex].quantity += quantity;
+        return updatedCart;
+      } else {
+        return [...prevCart, { ...item, quantity }];
       }
-      return item;
     });
-    setCart(updatedCart);
+    setIsCartEmpty(false);
   };
 
-  const getTotalPrice = () => {
-    return cart.reduce((total, item) => total + item.price * item.quantity, 0);
+  const removeItemFromCart = (itemId: string) => {
+    setCart((prevCart) => {
+      const updatedCart = prevCart.filter((item) => item.id !== itemId);
+      setIsCartEmpty(updatedCart.length === 0);
+      return updatedCart;
+    });
   };
 
   const clearCart = () => {
     setCart([]);
+    setIsCartEmpty(true);
   };
 
   return (
-    <CartContext.Provider value={{ cart, addItemToCart, updateItemQuantity, getTotalPrice, clearCart }}>
+    <CartContext.Provider value={{ cart, addItemToCart, removeItemFromCart, clearCart, isCartEmpty }}>
       {children}
     </CartContext.Provider>
   );
 };
 
-
-export const useCart = () => {
+export const useCart = (): CartContextType => {
   const context = useContext(CartContext);
   if (!context) {
     throw new Error('useCart must be used within a CartProvider');

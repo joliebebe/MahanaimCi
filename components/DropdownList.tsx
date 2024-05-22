@@ -1,73 +1,97 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React, { useState } from 'react'
-import CategoriesProd from '@/assets/data/catProd'
-import { Ionicons } from '@expo/vector-icons'
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import CategoriesProd from '@/assets/data/catProd';
+import CategoriesResto from '@/assets/data/catResto';
+import { Ionicons } from '@expo/vector-icons';
 import CategoryDetailsButtons from './CategoryDetailsButtons';
 
 type Props = {
-    onCategoryProd: (CategoriesProd: string) => void;
+    onCategoryProd: (categoryProd: string) => void;
+    onCategoryResto: (categoryResto: string) => void;
     onCategoryChange: (category: string) => void;
     selectedCategoryTitle: string;
+    categoryDetails: any[];
+    //onCategoryDetailsChange: (CategoriesDetails: any, category: any) => void;
 };
-const DropdownList = ({ onCategoryProd, onCategoryChange, selectedCategoryTitle }: Props) => {
 
-    const [selectedOption, setSelectedOption] = useState(0);
-    const [isOpen, setIsOpen] = useState(Array(CategoriesProd.length).fill(false));
+const DropdownList = ({ onCategoryProd,  onCategoryResto, onCategoryChange, selectedCategoryTitle, categoryDetails }: Props) => {
+    const [selectedOptionProd, setSelectedOptionProd] = useState<number | null>(null);
+    const [selectedOptionResto, setSelectedOptionResto] = useState<number | null>(null);
+    const [isOpenProd, setIsOpenProd] = useState(Array(CategoriesProd.length).fill(false));
+    const [isOpenResto, setIsOpenResto] = useState(Array(CategoriesResto.length).fill(false));
 
-    const handleOptionSelect = (index: number) => {
-        setSelectedOption(index);
-        const updatedIsOpen = [...isOpen];
-        updatedIsOpen[index] = !updatedIsOpen[index];
-        setIsOpen(updatedIsOpen);
-        onCategoryProd(CategoriesProd[index].title);
-        console.log(index);
+    const handleOptionSelect = (index: number, type: string) => {
+        if (type === 'prod') {
+            const updatedIsOpenProd = [...isOpenProd];
+            updatedIsOpenProd[index] = !updatedIsOpenProd[index];
+            setIsOpenProd(updatedIsOpenProd);
+            setSelectedOptionProd(index);
+            onCategoryProd(CategoriesProd[index].title);
+            console.log('onCatP',CategoriesProd);
+        } else if (type === 'resto') {
+            const updatedIsOpenResto = [...isOpenResto];
+            updatedIsOpenResto[index] = !updatedIsOpenResto[index];
+            setIsOpenResto(updatedIsOpenResto);
+            setSelectedOptionResto(index);
+            onCategoryResto(CategoriesResto[index].title);
+        }
+
         onCategoryChange(selectedCategoryTitle);
 
     };
 
-    const [categoryDetails, setCategoryDetails] = useState(0);
-
- // Ajouter un état pour suivre les détails de la catégorie sélectionnée
- const [selectedCategoryDetails, setSelectedCategoryDetails] = useState([]);
-
-    const onCatgDetailsChanged = (CategoriesDetails: any, category: string) => {
-        console.log("Selected category details:", CategoriesDetails);
-        setSelectedCategoryDetails(CategoriesDetails);
-        console.log("console category1:", category);
-        setCategory(category);
-
-    };
-    const [category, setCategory] = useState('Ferké');
+    const filteredCategoryDetails = categoryDetails || [];
 
     return (
         <View style={styles.container}>
-            {/* Boutons pour ouvrir/fermer le menu déroulant */}
-            {CategoriesProd.map((item, index) => (
-                <View key={index}>
-                    <TouchableOpacity
-                        onPress={() => handleOptionSelect(index)}
-                        style={styles.header}
-                    >
-                        <Text style={styles.headerText}>{item.title}</Text>
-                        <Ionicons style={styles.icon} name={isOpen[index] ? 'chevron-down-outline' : 'chevron-forward'} size={20} color="black" />
-                    </TouchableOpacity>
-                    {/* Options du menu déroulant */}
-                    {isOpen[index] && (
-                        <View style={styles.optionsContainer}>
-                            {index === 3 && (
-                                <View style={styles.CategoryDetailsButtons} >
-                                    <CategoryDetailsButtons onCategoryDetailsChange={onCatgDetailsChanged} />
-                                </View>
-                            )}
-                        </View>
-                    )}
-                </View>
-            ))}
+            {selectedCategoryTitle === "Resto" && (
+                CategoriesResto.map((item, index) => (
+                    <View key={index}>
+                        <TouchableOpacity
+                            onPress={() => handleOptionSelect(index, 'resto')}
+                            style={styles.header}
+                        >
+                            <Text style={styles.headerText}>{item.title}</Text>
+                            <Ionicons style={styles.icon} name={isOpenResto[index] ? 'chevron-down-outline' : 'chevron-forward'} size={20} color="black" />
+                        </TouchableOpacity>
+                        {isOpenResto[index] && (
+                            <View style={styles.optionsContainer}>
+                                <CategoryDetailsButtons
+                                    onCategoryDetailsChange={onCategoryChange}
+                                    
+                                    CategoriesDetails={filteredCategoryDetails.filter(detail => detail.categories === "Resto")}
+                                />
+                            </View>
+                        )}
+                    </View>
+                ))
+            )}
+            {selectedCategoryTitle === "Produits et Marques locales" && (
+                CategoriesProd.map((item, index) => (
+                    <View key={index}>
+                        <TouchableOpacity
+                            onPress={() => handleOptionSelect(index, 'prod')}
+                            style={styles.header}
+                        >
+                            <Text style={styles.headerText}>{item.title}</Text>
+                            <Ionicons style={styles.icon} name={isOpenProd[index] ? 'chevron-down-outline' : 'chevron-forward'} size={20} color="black" />
+                        </TouchableOpacity>
+                        {isOpenProd[index] && (
+                            <View style={styles.optionsContainer}>
+                                <CategoryDetailsButtons
+                                    onCategoryDetailsChange={onCategoryChange}
+                                    CategoriesDetails={filteredCategoryDetails.filter(detail => detail.categories === "Produits et Marques locales")}
+                                />
+                            </View>
+                        )}
+                    </View>
+                ))
+            )}
         </View>
-    )
-}
+    );
+};
 
-export default DropdownList
+export default DropdownList;
 
 const styles = StyleSheet.create({
     container: {
@@ -83,31 +107,18 @@ const styles = StyleSheet.create({
         padding: 10,
     },
     headerText: {
-        alignItems: 'flex-start',
         fontFamily: 'TimesNewRoman',
         fontSize: 16,
         marginRight: 'auto',
-
     },
     icon: {
-        alignItems: 'flex-end',
-        justifyContent: 'flex-end'
-
+        marginLeft: 'auto',
     },
     optionsContainer: {
         width: '100%',
         marginTop: 5,
     },
-    option: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        borderBottomWidth: 1,
-        borderBottomColor: '#ccc',
-        padding: 10,
-    },
     CategoryDetailsButtons: {
-        // marginHorizontal: 15,
         backgroundColor: '#fff',
         paddingTop: 20,
     },

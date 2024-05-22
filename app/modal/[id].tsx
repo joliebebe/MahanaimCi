@@ -1,7 +1,9 @@
 import { StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native'
 import React from 'react'
-import { useLocalSearchParams } from 'expo-router';
+import { Stack, router, useLocalSearchParams } from 'expo-router';
 import modalData from '@/assets/data/modal.json';
+import { Feather } from '@expo/vector-icons';
+import Colors from '@/constants/Colors';
 
 const modalDetails = () => {
     const { id } = useLocalSearchParams();
@@ -20,6 +22,20 @@ const modalDetails = () => {
         // navigation.navigate('HomeScreen');
     };
     return (
+        <>
+        <Stack.Screen
+        options={{
+          headerTransparent: true,
+          headerTitle: "",
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()} style={{ backgroundColor: "rgba(225, 225, 225, 0.5)", borderRadius: 10, padding: 4 }} >
+              <View style={{ backgroundColor: Colors.white, padding: 6, borderRadius: 10 }} >
+                <Feather name='arrow-left' size={20} />
+              </View>
+            </TouchableOpacity>
+          )
+        }}
+      />
         <View style={styles.container} >
             <Image
                 source={{ uri: item.image }}
@@ -48,6 +64,8 @@ const modalDetails = () => {
                 </View>
             </View>
         </View>
+      </>
+
     )
 }
 
@@ -60,7 +78,7 @@ const styles = StyleSheet.create({
     headerImage: {
         //flex: 1,
         width: '100%',
-        height: 200,
+        height: 300,
         justifyContent: 'center',
         alignItems: 'center',
         resizeMode: 'cover',
@@ -125,7 +143,7 @@ const styles = StyleSheet.create({
     },
     validationButtonText: {
         color: '#fff',
-        fontFamily: 'TimesNewRoman',
+        fontFamily: 'TimesNewRomanBold',
         fontSize: 10,
         alignSelf: 'center',
     },

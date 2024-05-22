@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { useNavigation } from 'expo-router';
+import { Stack, useNavigation } from 'expo-router';
 
 const Page = () => {
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -30,7 +30,7 @@ const Page = () => {
               color="#8b8745"
               style={{ marginRight: 15 }}
               onPress={() => {
-                navigation.navigate('index');
+                navigation.navigate('login');
               }}
             />
           ),
@@ -38,6 +38,14 @@ const Page = () => {
       }, [navigation]);
 
   return (
+    <>
+    
+    <Stack.Screen
+                options={{
+                    headerTransparent: true,
+                    headerTitle: "",
+                }}
+            />
     <SafeAreaProvider>
          <View style={styles.container} >
       <TouchableOpacity onPress={pickImageAsync}>
@@ -88,6 +96,8 @@ const Page = () => {
         </View>
     </View>
     </SafeAreaProvider>
+    </>
+
   );
 };
 
