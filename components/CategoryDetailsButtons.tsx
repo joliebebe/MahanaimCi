@@ -1,56 +1,74 @@
+import React, { useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import React, { useRef, useState } from 'react';
+import axios from 'axios';
 import Listings from './Listings';
 
 type Props = {
     onCategoryDetailsChange: (CategoriesDetails: any, category: any) => void;
-    CategoriesDetails: any[];
 };
 
-const CategoryDetailsButtons = ({ onCategoryDetailsChange, CategoriesDetails }: Props) => {
+const CategoryDetailsButtons = ({ onCategoryDetailsChange }: Props) => {
+    const [CategoriesDetails, setCategoriesDetails] = useState<any[]>([]);
     const scrollRef = useRef<ScrollView>(null);
     const itemRef = useRef<TouchableOpacity[] | null[]>([]);
-    const [activeIndex, setActiveIndex] = useState(0);
-    const [selectedCategory, setSelectedCategory] = useState(CategoriesDetails[0] || {});
+    const [activeIndex, setActiveIndex] = useState<number | null>(null);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await axios.get('https://api.mahanaiim.ci/api/client/liste-des-villes');
+                const villes = response.data.resultat; // Extraire le tableau `resultat` de la réponse
+                setCategoriesDetails(villes);
+            } catch (error) {
+                console.error('Erreur lors de la récupération des villes:', error);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     const handleSelectCategory = (index: number) => {
+        if (activeIndex === index) {
+            setDropdownOpen(!dropdownOpen);
+        } else {
+            setActiveIndex(index);
+            setDropdownOpen(true);
+            onCategoryDetailsChange(CategoriesDetails[index], CategoriesDetails[index].libelle);
+        }
+
         const selected = itemRef.current[index];
-
-        setActiveIndex(index);
-
         selected?.measure((x) => {
             scrollRef.current?.scrollTo({ x: x, y: 0, animated: true });
         });
-
-        const category = CategoriesDetails[index];
-        setSelectedCategory(category);
-        onCategoryDetailsChange(category, category.destination);
-        console.log('category',category);
     };
-console.log('handleSelectCategory',handleSelectCategory);
+
     return (
-        <View style={styles.container}>
+        <View>
             <ScrollView
                 ref={scrollRef}
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ gap: 25, marginBottom: 10 }}
+                contentContainerStyle={{ gap: 10, paddingVertical: 5, marginBottom: 10 }}
             >
-                {CategoriesDetails.map((item, index) => (
+                {CategoriesDetails.map((category, index) => (
                     <TouchableOpacity
                         key={index}
                         ref={(el) => (itemRef.current[index] = el)}
                         onPress={() => handleSelectCategory(index)}
                         style={activeIndex === index ? styles.categoryBtnActive : styles.categoryBtn}
                     >
-                        <Text style={activeIndex === index ? styles.textBtnActive : styles.textBtn}>
-                            {item.destination}
-                        </Text>
+                        <Text style={styles.categoryTextBtn}>{category.libelle}</Text>
                     </TouchableOpacity>
                 ))}
             </ScrollView>
-            {/* Passer la catégorie sélectionnée à Listings */}
-            <Listings listings={selectedCategory.listings || []} selectedCategory={selectedCategory} />
+            {activeIndex !== null && dropdownOpen && (
+                <View>
+                    <Listings
+                        filteredListings={CategoriesDetails.filter(listing => listing.libelle === CategoriesDetails[activeIndex].libelle)}
+                    />
+                </View>
+            )}
         </View>
     );
 };
@@ -58,9 +76,6 @@ console.log('handleSelectCategory',handleSelectCategory);
 export default CategoryDetailsButtons;
 
 const styles = StyleSheet.create({
-    container: {
-        marginHorizontal: 15,
-    },
     categoryBtn: {
         flexDirection: 'row',
         textAlign: 'center',
@@ -69,10 +84,13 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         borderRadius: 10,
         shadowRadius: 3,
+        shadowColor: '#042e3f',
+        shadowOffset: { width: 2, height: 2 },
+        shadowOpacity: 0.1,
     },
-    textBtn: {
+    categoryTextBtn: {
         color: '#fff',
-        fontFamily: 'TimesNewRoman',
+        fontFamily: 'TimesNewRomanBold',
     },
     categoryBtnActive: {
         flexDirection: 'row',
@@ -82,10 +100,8 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         borderRadius: 10,
         shadowRadius: 3,
-    },
-    textBtnActive: {
-        color: '#fff',
-        fontFamily: 'TimesNewRoman',
-        fontWeight: 'bold',
+        shadowColor: '#7c7c7e',
+        shadowOffset: { width: 2, height: 2 },
+        shadowOpacity: 0.1,
     },
 });

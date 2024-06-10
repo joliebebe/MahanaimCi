@@ -1,7 +1,6 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import React, { useState } from 'react';
-import CategoriesProd from '@/assets/data/catProd';
-import CategoriesResto from '@/assets/data/catResto';
+import { StyleSheet, Text, TouchableOpacity, View, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
 import CategoryDetailsButtons from './CategoryDetailsButtons';
 
@@ -11,14 +10,38 @@ type Props = {
     onCategoryChange: (category: string) => void;
     selectedCategoryTitle: string;
     categoryDetails: any[];
-    //onCategoryDetailsChange: (CategoriesDetails: any, category: any) => void;
 };
 
-const DropdownList = ({ onCategoryProd,  onCategoryResto, onCategoryChange, selectedCategoryTitle, categoryDetails }: Props) => {
+const DropdownList = ({ onCategoryProd, onCategoryResto, onCategoryChange, selectedCategoryTitle, categoryDetails }: Props) => {
     const [selectedOptionProd, setSelectedOptionProd] = useState<number | null>(null);
     const [selectedOptionResto, setSelectedOptionResto] = useState<number | null>(null);
-    const [isOpenProd, setIsOpenProd] = useState(Array(CategoriesProd.length).fill(false));
-    const [isOpenResto, setIsOpenResto] = useState(Array(CategoriesResto.length).fill(false));
+    const [isOpenProd, setIsOpenProd] = useState<boolean[]>([]);
+    const [isOpenResto, setIsOpenResto] = useState<boolean[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [subCategories, setSubCategories] = useState<any[]>([]);
+
+    useEffect(() => {
+        if (selectedCategoryTitle) {
+            fetchSubCategories(selectedCategoryTitle);
+        }
+    }, [selectedCategoryTitle]);
+
+    const fetchSubCategories = async (categoryTitle: string) => {
+        setLoading(true);
+        try {
+            const response = await axios.get('https://api.mahanaiim.ci/api/client/liste-des-categories');
+            const category = response.data.resultat.categories.find((cat: any) => cat.libelle === categoryTitle);
+            if (category) {
+                setSubCategories(category.sous_categories);
+                setIsOpenProd(Array(category.sous_categories.length).fill(false));
+                setIsOpenResto(Array(category.sous_categories.length).fill(false));
+            }
+            setLoading(false);
+        } catch (error) {
+            console.error("Error fetching subcategories:", error);
+            setLoading(false);
+        }
+    };
 
     const handleOptionSelect = (index: number, type: string) => {
         if (type === 'prod') {
@@ -26,61 +49,60 @@ const DropdownList = ({ onCategoryProd,  onCategoryResto, onCategoryChange, sele
             updatedIsOpenProd[index] = !updatedIsOpenProd[index];
             setIsOpenProd(updatedIsOpenProd);
             setSelectedOptionProd(index);
-            onCategoryProd(CategoriesProd[index].title);
-            console.log('onCatP',CategoriesProd);
+            onCategoryProd(subCategories[index].libelle);
         } else if (type === 'resto') {
             const updatedIsOpenResto = [...isOpenResto];
             updatedIsOpenResto[index] = !updatedIsOpenResto[index];
             setIsOpenResto(updatedIsOpenResto);
             setSelectedOptionResto(index);
-            onCategoryResto(CategoriesResto[index].title);
+            onCategoryResto(subCategories[index].libelle);
         }
 
         onCategoryChange(selectedCategoryTitle);
-
     };
 
-    const filteredCategoryDetails = categoryDetails || [];
+    if (loading) {
+        return <ActivityIndicator size="large" color="#0000ff" />;
+    }
 
     return (
         <View style={styles.container}>
             {selectedCategoryTitle === "Resto" && (
-                CategoriesResto.map((item, index) => (
+                subCategories.map((item: any, index: number) => (
                     <View key={index}>
                         <TouchableOpacity
                             onPress={() => handleOptionSelect(index, 'resto')}
                             style={styles.header}
                         >
-                            <Text style={styles.headerText}>{item.title}</Text>
+                            <Text style={styles.headerText}>{item.libelle}</Text>
                             <Ionicons style={styles.icon} name={isOpenResto[index] ? 'chevron-down-outline' : 'chevron-forward'} size={20} color="black" />
                         </TouchableOpacity>
                         {isOpenResto[index] && (
                             <View style={styles.optionsContainer}>
                                 <CategoryDetailsButtons
                                     onCategoryDetailsChange={onCategoryChange}
-                                    
-                                    CategoriesDetails={filteredCategoryDetails.filter(detail => detail.categories === "Resto")}
+                                    CategoriesDetails={item.produits}
                                 />
                             </View>
                         )}
                     </View>
                 ))
             )}
-            {selectedCategoryTitle === "Produits et Marques locales" && (
-                CategoriesProd.map((item, index) => (
+            {selectedCategoryTitle === "Marque de produit locaux" && (
+                subCategories.map((item: any, index: number) => (
                     <View key={index}>
                         <TouchableOpacity
                             onPress={() => handleOptionSelect(index, 'prod')}
                             style={styles.header}
                         >
-                            <Text style={styles.headerText}>{item.title}</Text>
+                            <Text style={styles.headerText}>{item.libelle}</Text>
                             <Ionicons style={styles.icon} name={isOpenProd[index] ? 'chevron-down-outline' : 'chevron-forward'} size={20} color="black" />
                         </TouchableOpacity>
                         {isOpenProd[index] && (
                             <View style={styles.optionsContainer}>
                                 <CategoryDetailsButtons
                                     onCategoryDetailsChange={onCategoryChange}
-                                    CategoriesDetails={filteredCategoryDetails.filter(detail => detail.categories === "Produits et Marques locales")}
+                                    CategoriesDetails={item.produits}
                                 />
                             </View>
                         )}

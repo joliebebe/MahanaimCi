@@ -2,9 +2,10 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { CartProvider } from '@/context/CartContext';
-
+import { UserProvider } from '@/context/UserContext';
+import { ImageProvider } from '@/context/ImageContext';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -14,7 +15,7 @@ export {
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: 'login',
-  
+
 };
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -48,14 +49,19 @@ export default function RootLayout() {
 function RootLayoutNav() {
 
   return (
-    <CartProvider>
-      <Stack>
-        <Stack.Screen name='login' options={{headerShown:false}} />
-        <Stack.Screen name='register' options={{headerShown:false}} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        
-      </Stack>
-    </CartProvider>
+    <UserProvider>
+      <CartProvider>
+        <ImageProvider>
+          <Stack>
+            <Stack.Screen name='login' options={{ headerShown: false }} />
+            <Stack.Screen name='register' options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          </Stack>
+        </ImageProvider>
+
+      </CartProvider>
+    </UserProvider>
+
 
 
 

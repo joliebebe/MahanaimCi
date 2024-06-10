@@ -1,66 +1,60 @@
-import { StyleSheet, Text, TouchableOpacity, View, Image, TextInput, ScrollView, ListRenderItem, FlatList } from 'react-native'
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View, Image, TextInput, ScrollView, FlatList, ActivityIndicator } from 'react-native';
 import { Link, Stack } from 'expo-router';
 import { useHeaderHeight } from '@react-navigation/elements';
 import Colors from '@/constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import CategoryButtons from '../../components/CategoryButtons'
-//import DropdownList from '@/components/DropdownList'
+import CategoryButtons from '../../components/CategoryButtons';
 import CarouselScreen from '@/components/carousel';
-import { modalType } from '@/types/modalType'
-import modalData from '@/assets/data/modal.json';
-import listingsData from '@/assets/data/details.json';
-
+import { modalType } from '@/types/modalType';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { UserContext } from '@/context/UserContext';
+import { ImageContext } from '@/context/ImageContext';
+import axios from 'axios';
 
-type Props = {
-    listings: any[];
-    category: string;
-    modal: string;
-};
 const Page = () => {
     const headerHeight = useHeaderHeight();
-    const [category, setCategory] = useState('Resto');
+    const { user } = useContext(UserContext);
+    const { selectedImage } = useContext(ImageContext);
+    const [modalData, setModalData] = useState<modalType[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const onCatChanged = (category: string) => {
-        console.log("console category:", category);
-        setCategory(category);
-        // Logique de traitement du clic sur le bouton de catégorie
-        setShowDropdown(true); // Met à jour l'état pour afficher le DropdownList
-        //console.log("set",setShowDropdown)
+    useEffect(() => {
+        fetchPrestationsPro();
+    }, []);
 
+    const fetchPrestationsPro = async () => {
+        try {
+            const response = await axios.get('https://api.mahanaiim.ci/api/client/liste-des-categories');
+            const prestationsPro = response.data.resultat.prestations_pro;
+            setModalData(prestationsPro);
+            setLoading(false);
+        } catch (error) {
+            console.error("Error fetching prestations pro:", error);
+            setLoading(false);
+        }
     };
 
-    const [selectedOption, setSelectedOption] = useState('SOUMARA');
+    const renderItems = ({ item }) => (
+        <Link href={`/modal/${item.id}`} asChild>
+            <TouchableOpacity>
+                <View style={styles.item}>
+                    <Image
+                        source={{ uri: `https://api.mahanaiim.ci/backend/public/fichiers/${item.image}` }}
+                        style={styles.image}
+                    />
+                    <Text style={styles.itemTxt} numberOfLines={1} ellipsizeMode="tail">{item.libelle}</Text>
+                    <Text style={styles.itemPrice}>{item.prix} FCFA</Text>
+                </View>
+            </TouchableOpacity>
+        </Link>
+    );
     const [showDropdown, setShowDropdown] = useState(false);
 
-    const handleCategorySelect = (CategoriesProd: any) => {
-        console.log("Catégorie sélectionnée :", CategoriesProd);
-        setSelectedOption("CategoriesProd:", CategoriesProd);
+    const handleCategoryChange = (category: string) => {
+        console.log("Selected category:", category);
     };
-
-    const renderItems: ListRenderItem<modalType> = ({ item }) => {
-        return (
-            <Link href={`/modal/${item.id}`} asChild>
-                <TouchableOpacity>
-                    <View style={styles.item}>
-                        <Image
-                            source={{ uri: item.image }}
-                            style={styles.image}
-                        />
-                        <Text style={styles.itemTxt} numberOfLines={1} ellipsizeMode="tail"> {item.name}</Text>
-                        <Text style={styles.itemPrice} >{item.price}</Text>
-                    </View>
-                </TouchableOpacity>
-            </Link>
-
-        );
-    };
-
-    // Filtrer les listings en fonction de la catégorie sélectionnée
-    const filteredDetails = listingsData.filter(item => item.categories === category);
-
 
     return (
         <>
@@ -72,52 +66,49 @@ const Page = () => {
             />
             <SafeAreaProvider>
                 <ScrollView>
-
                     <LinearGradient
                         colors={["#FFFFFF", Colors.bgColorspage]}
                         start={{ x: 0, y: 1 }}
                         end={{ x: 1, y: 1 }}
-                        style={[styles.container,]}
+                        style={styles.container}
                     >
-
-                        <View >
-                            <View style={{ margin: 5, marginHorizontal: 15, paddingTop: 25, }}>
+                        <View>
+                            <View style={{ margin: 5, marginHorizontal: 15, paddingTop: 25 }}>
                                 <Text style={styles.titre}>
-                                    Akwaba, <Text style={styles.titre}>N'Guess</Text>
+                                    Akwaba, {user && user.nom ? <Text style={styles.titre}>{user.nom}</Text> : "Utilisateur"}
                                 </Text>
                             </View>
-
                             <View style={{ flexDirection: 'row', marginHorizontal: 15, alignItems: 'center' }}>
-                                <View style={{ flex: 1, }}>
-                                    <Text style={styles.titre} >Bienvenue {'\n'}sur le marché{'\n'}MAHANAIIM.CI</Text>
+                                <View style={{ flex: 1 }}>
+                                    <Text style={styles.titre}>Bienvenue {'\n'}sur le marché{'\n'}MAHANAIIM.CI</Text>
                                 </View>
                                 <View style={styles.iconContainer}>
-                                    <Image source={require('../../assets/images/mon-icone.png')} style={styles.icon} />
+                                    {selectedImage ? (
+                                        <Image source={{ uri: selectedImage }} style={styles.icon} />
+                                    ) : (
+                                        <Image source={require('../../assets/images/mon-icone.png')} style={styles.icon} />
+                                    )}
                                 </View>
                             </View>
-
-                            <View style={styles.searchSectionWrapper} >
-                                <View style={styles.searchBar} >
+                            <View style={styles.searchSectionWrapper}>
+                                <View style={styles.searchBar}>
                                     <TextInput placeholder="Recherche ici" placeholderTextColor="#fff" style={{ flex: 1, color: Colors.white }} />
                                     <Ionicons name='search' size={24} style={{ marginLeft: 10, color: Colors.white }} />
                                 </View>
                             </View>
-                            <CategoryButtons onCategoryChange={onCatChanged} setShowDropdown={setShowDropdown} />
+                            <CategoryButtons onCategoryChange={handleCategoryChange} setShowDropdown={setShowDropdown} />
 
                             <View style={styles.guideContainer}>
                                 <Text style={styles.guideText}>Guide de fonctionnement</Text>
                             </View>
-
                         </View>
                         <View style={styles.container1}>
-                            <CarouselScreen onCategoryChanged={onCatChanged} />
+                            <CarouselScreen onCategoryChanged={console.log} />
                         </View>
-
                         <View style={styles.Prestation}>
                             <Text style={styles.PrestationText1}>Prestation Pro</Text>
                             <Text style={styles.PrestationText2}>Plus</Text>
                         </View>
-
                         <View style={{ margin: 5, marginHorizontal: 15, marginBottom: 20 }}>
                             <Text style={{ fontFamily: 'TimesNewRoman', fontSize: 20 }}>
                                 Nous envoyons des professionnels à votre porte, selon votre delai et votre budget
@@ -125,21 +116,24 @@ const Page = () => {
                         </View>
                     </LinearGradient>
                     <View>
-                        <FlatList
-                            data={modalData}
-                            renderItem={renderItems}
-                            horizontal
-                            showsHorizontalScrollIndicator={false} />
+                        {loading ? (
+                            <ActivityIndicator size="large" color="#0000ff" />
+                        ) : (
+                            <FlatList
+                                data={modalData}
+                                renderItem={renderItems}
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                            />
+                        )}
                     </View>
-
                 </ScrollView>
             </SafeAreaProvider>
         </>
+    );
+};
 
-    )
-}
-
-export default Page
+export default Page;
 
 const styles = StyleSheet.create({
     container: {

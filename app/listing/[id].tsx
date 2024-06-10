@@ -6,7 +6,6 @@ import { Feather, MaterialIcons } from '@expo/vector-icons';
 import Colors from '@/constants/Colors';
 import { useNavigation } from '@react-navigation/native';
 import Listings from '@/components/Listings';
-import CategoriesDetails from '@/assets/data/categoryDetails';
 import { useCart } from '@/context/CartContext';
 import { CartItemType } from '@/types/cardItemType';
 import Animated from 'react-native-reanimated';
@@ -29,7 +28,7 @@ const ListingDetails = () => {
       setItem(foundItem);
       setQuantity(foundItem.quantity || 1);
       setTotalPrice(foundItem.price * (foundItem.quantity || 1));
-      //setSelectedCategory(foundItem.categories); // Mise à jour de la catégorie sélectionnée
+      setSelectedCategory(foundItem.categories); // Mise à jour de la catégorie sélectionnée
     } else {
       console.log('error');
     }
@@ -83,15 +82,7 @@ const ListingDetails = () => {
     <>
       <Stack.Screen
         options={{
-          headerTransparent: true,
-          headerTitle: "",
-          headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()} style={{ backgroundColor: "rgba(225, 225, 225, 0.5)", borderRadius: 10, padding: 4 }} >
-              <View style={{ backgroundColor: Colors.white, padding: 6, borderRadius: 10 }} >
-                <Feather name='arrow-left' size={20} />
-              </View>
-            </TouchableOpacity>
-          )
+          // Existing header options
         }}
       />
       <View style={styles.container}>
@@ -140,7 +131,7 @@ const ListingDetails = () => {
               </TouchableOpacity>
             )}
             <TouchableOpacity onPress={handleNavigation}>
-              <Text style={styles.lienPanier}>Aller a mon panier</Text>
+              <Text style={styles.lienPanier}>Aller à mon panier</Text>
             </TouchableOpacity>
             <Text style={styles.autreProd}>
               AUTRE PRODUITS
@@ -151,7 +142,8 @@ const ListingDetails = () => {
       </View>
     </>
   );
-}
+};
+
 
 export default ListingDetails;
 
@@ -188,7 +180,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'TimesNewRoman',
     color: Colors.bgColorslink,
-
   },
   autreProd: {
     fontSize: 18,
@@ -244,7 +235,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
-
   },
   quantityText: {
     fontSize: 18,

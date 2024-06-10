@@ -1,19 +1,58 @@
-import { StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native'
-import React from 'react'
-import { Stack, router, useLocalSearchParams } from 'expo-router';
-import modalData from '@/assets/data/modal.json';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useRoute } from '@react-navigation/native';
+import axios from 'axios';
+import { Stack, router } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import Colors from '@/constants/Colors';
 
 const modalDetails = () => {
-    const { id } = useLocalSearchParams();
-    // Recherchez l'élément correspondant dans la source de données en fonction de l'ID
-    const item = modalData.find(item => item.id === id);
+    const route = useRoute();
+    const { id } = route.params;
+    const [item, setItem] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        console.log("Component mounted with ID:", id);
+        fetchDetails();
+    }, [id]);
+
+    const fetchDetails = async () => {
+        console.log("Fetching details for ID:", id);
+        try {
+            const response = await axios.get('https://api.mahanaiim.ci/api/client/liste-des-categories');
+            console.log("API Response:", response.data);
+
+            const prestations = response.data.resultat.prestations_pro;
+            console.log("Prestations Pro:", prestations);
+
+            // Ensure ID type consistency
+            const prestation = prestations.find(prestation => String(prestation.id) === String(id));
+            if (prestation) {
+                setItem(prestation);
+            } else {
+                console.error("Prestation not found");
+            }
+
+            setLoading(false);
+        } catch (error) {
+            console.error("Error fetching prestation pro details:", error);
+            console.error("Error details:", error.response ? error.response.data : error.message);
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return <ActivityIndicator size="large" color="#0000ff" />;
+    }
 
     if (!item) {
-        // Gérez le cas où aucun élément correspondant n'est trouvé
-        return <Text>Aucun élément correspondant trouvé pour l'ID {id}</Text>;
-    };
+        return (
+            <View style={styles.errorContainer}>
+                <Text>Details not found!</Text>
+            </View>
+        );
+    }
     const handleValidation = () => {
         // Valider le formulaire
         // Vous pouvez ajouter ici la logique pour valider les informations du formulaire
@@ -21,55 +60,56 @@ const modalDetails = () => {
         // Après validation, naviguer vers l'écran HomeScreen
         // navigation.navigate('HomeScreen');
     };
+
     return (
         <>
-        <Stack.Screen
-        options={{
-          headerTransparent: true,
-          headerTitle: "",
-          headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()} style={{ backgroundColor: "rgba(225, 225, 225, 0.5)", borderRadius: 10, padding: 4 }} >
-              <View style={{ backgroundColor: Colors.white, padding: 6, borderRadius: 10 }} >
-                <Feather name='arrow-left' size={20} />
-              </View>
-            </TouchableOpacity>
-          )
-        }}
-      />
-        <View style={styles.container} >
-            <Image
-                source={{ uri: item.image }}
-                style={styles.headerImage}
+            <Stack.Screen
+                options={{
+                    headerTransparent: true,
+                    headerTitle: "",
+                    headerLeft: () => (
+                        <TouchableOpacity onPress={() => router.back()} style={{ backgroundColor: "rgba(225, 225, 225, 0.5)", borderRadius: 10, padding: 4 }} >
+                            <View style={{ backgroundColor: Colors.white, padding: 6, borderRadius: 10 }} >
+                                <Feather name='arrow-left' size={20} />
+                            </View>
+                        </TouchableOpacity>
+                    )
+                }}
             />
-           
-            <View style={styles.contentContainer}>
-                <View style={styles.infoContainer}>
-                    <Text style={styles.placeText}>{item.place}</Text>
-                    <Text style={styles.priceText}>{item.price}</Text>
+            <ScrollView contentContainerStyle={styles.container}>
+                {item.image ? (
+                    <Image
+                    source={{ uri: `https://api.mahanaiim.ci/backend/public/fichiers/${item.image}` }}
+                    style={styles.headerImage}
+                    />
+                ) : (
+                    <View style={styles.placeholderImage}>
+                        <Text>No Image Available</Text>
+                    </View>
+                )}
+                <View style={styles.contentContainer}>
+                    <View style={styles.infoContainer}>
+                        <Text style={styles.placeText}>{item.libelle}</Text>
+                        <Text style={styles.priceText}>{item.prix} FCFA</Text>
+
+                    </View>
+                    <Text style={styles.titreText}>Description</Text>
+                    <Text style={styles.descriptionText}>{item.description}</Text>
+                    <View style={styles.position}>
+                        <TouchableOpacity style={styles.validationButton} onPress={handleValidation}>
+                            <Text style={styles.validationButtonText}>AVIS CLIENTS </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.validationButton} onPress={handleValidation}>
+                            <Text style={styles.validationButtonText}>SOLLICITER SUR WHATSAPP </Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
-                <Text style={styles.titreText}>Description</Text>
+            </ScrollView>
+        </>
+    );
+};
 
-                <Text style={styles.descriptionText}>
-                    {item.description}
-                </Text>
-                {/* <Button title="Fermer" onPress={onClose} /> */}
-
-                <View style={styles.position}>
-                    <TouchableOpacity style={styles.validationButton} onPress={handleValidation}>
-                        <Text style={styles.validationButtonText}>AVIS CLIENTS </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.validationButton} onPress={handleValidation}>
-                        <Text style={styles.validationButtonText}>SOLLICITER SUR WHATSAPP </Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        </View>
-      </>
-
-    )
-}
-
-export default modalDetails
+export default modalDetails;
 
 const styles = StyleSheet.create({
     container: {
@@ -78,7 +118,7 @@ const styles = StyleSheet.create({
     headerImage: {
         //flex: 1,
         width: '100%',
-        height: 300,
+        height: 200,
         justifyContent: 'center',
         alignItems: 'center',
         resizeMode: 'cover',
@@ -146,5 +186,17 @@ const styles = StyleSheet.create({
         fontFamily: 'TimesNewRomanBold',
         fontSize: 10,
         alignSelf: 'center',
+    },
+    placeholderImage: {
+        width: '100%',
+        height: 200,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#e0e0e0',
+    },
+    errorContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });
