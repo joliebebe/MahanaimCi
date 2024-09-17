@@ -9,9 +9,9 @@ type Props = {
 };
 
 const CategoryDetailsButtons = ({ onCategoryDetailsChange, selectedSubCategory }: Props) => {
-  const [CategoriesDetails, setCategoriesDetails] = useState<any[]>([]);
+  const [categoriesDetails, setCategoriesDetails] = useState<any[]>([]);
   const scrollRef = useRef<ScrollView>(null);
-  const itemRef = useRef<TouchableOpacity[] | null[]>([]);
+  const itemRef = useRef<TouchableOpacity[]>([]);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -20,11 +20,11 @@ const CategoryDetailsButtons = ({ onCategoryDetailsChange, selectedSubCategory }
     const fetchData = async () => {
       try {
         const response = await axios.get('https://api.mahanaiim.ci/api/client/liste-des-villes');
-        const villes = response.data.resultat; // Extract the `resultat` array from the response
-        setCategoriesDetails(villes);
+        const villes = response.data.resultat; // Extraction du tableau `resultat` de la réponse
+        setCategoriesDetails(villes); 
         setLoading(false);
       } catch (error) {
-        console.error('Erreur lors de la récupération des villes:', error);
+        console.error('Error fetching categories details:', error);
         setLoading(false);
       }
     };
@@ -32,20 +32,24 @@ const CategoryDetailsButtons = ({ onCategoryDetailsChange, selectedSubCategory }
     fetchData();
   }, []);
 
-  const handleSelectCategory = (index: number) => {
+  const handleSelectSubCategory = (index: number) => {
     if (activeIndex === index) {
       setDropdownOpen(!dropdownOpen);
     } else {
       setActiveIndex(index);
       setDropdownOpen(true);
-      onCategoryDetailsChange(CategoriesDetails[index]);
+      onCategoryDetailsChange(categoriesDetails[index]);
     }
 
     const selected = itemRef.current[index];
-    selected?.measure((x) => {
-      scrollRef.current?.scrollTo({ x: x, y: 0, animated: true });
+    selected?.measure((x, y, width, height, pageX, pageY) => {
+      scrollRef.current?.scrollTo({ x: pageX, y: 0, animated: true });
     });
   };
+
+  if (loading) {
+    return <ActivityIndicator size="large" color="#0000ff" />;
+  }
 
   return (
     <View>
@@ -55,27 +59,21 @@ const CategoryDetailsButtons = ({ onCategoryDetailsChange, selectedSubCategory }
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ gap: 10, paddingVertical: 5, marginBottom: 10 }}
       >
-        {CategoriesDetails.map((category, index) => (
+        {categoriesDetails.map((categoryDetail, index) => (
           <TouchableOpacity
             key={index}
             ref={(el) => (itemRef.current[index] = el)}
-            onPress={() => handleSelectCategory(index)}
+            onPress={() => handleSelectSubCategory(index)}
             style={activeIndex === index ? styles.categoryBtnActive : styles.categoryBtn}
           >
-            <Text style={styles.categoryTextBtn}>{category.libelle}</Text>
+            <Text style={styles.categoryTextBtn}>{categoryDetail.libelle}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
       {activeIndex !== null && dropdownOpen && (
-        <View>
-          {loading ? (
-            <ActivityIndicator size="large" color="#0000ff" />
-          ) : (
-            <Listings
-              selectedCategory={selectedSubCategory.villes.find((ville: any) => ville.id === CategoriesDetails[activeIndex].id)}
-            />
-          )}
-        </View>
+        <Listings
+          selectedCategory={categoriesDetails[activeIndex]} // Pass the selected category details
+        />
       )}
     </View>
   );

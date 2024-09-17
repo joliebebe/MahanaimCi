@@ -11,7 +11,19 @@ export const useUser = () => {
 };
 
 export const UserProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState ({
+    nom: '',
+    prenom: '',
+    email: '',
+    sexe: '',
+    telephone: '',
+    password: '',
+    photo: '',
+    login: '',
+    accessToken: '', 
+   //new_password:'',
+    confirm_password:'',
+  });
   const [token, setToken] = useState(null);
 
   return (

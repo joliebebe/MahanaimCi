@@ -4,9 +4,11 @@ import { View, ScrollView, Text, Animated, ImageBackground, StyleSheet, Touchabl
 const CarouselScreen = () => {
 
   const data = [
-    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ',
-    'Quis ipsum suspendisse ultrices gravida adipiscing.',
-    'Troisième texte, ipsum dolor sit amet, consectetur.',
+    '1- Dérouler le menu ',
+    "2- Cliqué sur l'objet de la recherche",
+    '3- Choissisez parmis les villes ou le produit est disponible de préférence la plus proche',
+    '4- Remplissez votre panier puis validé',
+
     // Ajoutez autant de textes que nécessaire
   ];
   const scrollViewRef = useRef(null);

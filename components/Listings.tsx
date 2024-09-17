@@ -71,9 +71,9 @@ const Listings = ({ selectedCategory }: Props) => {
 
   return (
     <View style={styles.container}>
-     {/*  {isLoading ? (
+      {isLoading ? (
         <ActivityIndicator size="large" color={Colors.bgColorsgreen} />
-      ) : ( */}
+      ) : (
         <FlatList
           data={filteredListings}
           renderItem={renderItems}
@@ -81,7 +81,7 @@ const Listings = ({ selectedCategory }: Props) => {
           horizontal
           showsHorizontalScrollIndicator={false}
         />
-      {/* )} */}
+      )}
     </View>
   );
 };

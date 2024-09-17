@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, Image, ActivityIndicator, ToastAndroid } from 'react-native';
-import { useLocalSearchParams, Stack, router } from 'expo-router';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Image, ActivityIndicator, ToastAndroid, FlatList } from 'react-native';
+import { useLocalSearchParams, Stack, router, Link } from 'expo-router';
 import { Feather, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useCart } from '@/context/CartContext';
@@ -27,6 +27,7 @@ const ListingDetails = () => {
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [showAddToast, setShowAddToast] = useState(false);
   const [showRemoveToast, setShowRemoveToast] = useState(false);
+  const [otherProduit, setOtherProduit] = useState([]);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -35,7 +36,7 @@ const ListingDetails = () => {
         const response = await axios.get('https://api.mahanaiim.ci/api/client/liste-des-categories');
         const categories = response.data.resultat.categories;
         let foundItem = null;
-
+  
         categories.forEach((category) => {
           if (category.produits) {
             category.produits.forEach((product) => {
@@ -46,7 +47,7 @@ const ListingDetails = () => {
             });
           }
         });
-
+  
         if (foundItem) {
           setItem(foundItem);
           setQuantity(1);
@@ -60,11 +61,45 @@ const ListingDetails = () => {
         setLoading(false);
       }
     };
-
+  
     if (id) {
       fetchDetails();
+      fetchOtherProduit();
     }
   }, [id]);
+  
+
+  const fetchOtherProduit = async () => {
+    try {
+      const response = await axios.get('https://api.mahanaiim.ci/api/produits/liste?etat=1');
+      console.log(response.data.resultat); // Ajoutez ceci pour vérifier la structure des données
+      setOtherProduit(response.data.resultat);
+    } catch (error) {
+      console.error("Error fetching other prestations:", error);
+    }
+  };
+
+  const renderItems = ({ item }) => {
+    if (!item || !item.image) {
+      return null; // ou afficher un indicateur de chargement ou un message d'erreur
+    }
+
+    return (
+      <Link href={`/modal/${item.id}`} asChild>
+        <TouchableOpacity>
+          <View style={styles.item}>
+            <Image
+              source={{ uri: `https://api.mahanaiim.ci/backend/public/fichiers/${item.image}` }}
+              style={styles.image}
+            />
+            <Text style={styles.itemTxt} numberOfLines={1} ellipsizeMode="tail">{item.libelle}</Text>
+            <Text style={styles.itemPrice}>{item.prix}</Text>
+          </View>
+        </TouchableOpacity>
+      </Link>
+    );
+  };
+
 
   const handleIncrement = () => {
     setQuantity(prevQuantity => {
@@ -142,7 +177,7 @@ const ListingDetails = () => {
         }}
       />
 
-      <View style={styles.container}>
+      <ScrollView style={styles.container}>
 
         <Animated.ScrollView>
           <Image
@@ -161,10 +196,10 @@ const ListingDetails = () => {
               <Text style={styles.placeText}>{item.libelle}{'\n'}
                 <Text style={styles.placeTextCategorie}>{selectedCategory}</Text>
               </Text>
-              <Text style={styles.priceText}>{item.prix} fcfa/kg</Text>
+              <Text style={styles.priceText}>{item.prix} fcfa</Text>
             </View>
 
-            <View style={{ flexDirection: 'row', paddingBottom: 10, alignSelf:'center' }}>
+            <View style={{ flexDirection: 'row', paddingBottom: 10, alignSelf: 'center' }}>
               <Ionicons name="location" size={24} color="#63f345" style={{ paddingRight: 10 }} />
               <Text style={styles.state}>{item.localisation_produit}</Text>
             </View>
@@ -208,12 +243,13 @@ const ListingDetails = () => {
               <Text style={styles.lienPanier}>Aller à mon panier</Text>
             </TouchableOpacity>
             <Text style={styles.autreProd}>
-              AUTRE PRODUITS
+              AUTRE MENUS
             </Text>
+           
             <Listings selectedCategory={{ id: parseInt(id), libelle: selectedCategory }} />
           </View>
         </Animated.ScrollView>
-      </View>
+      </ScrollView>
 
 
     </>
@@ -224,7 +260,7 @@ export default ListingDetails;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    //flex: 1,
     backgroundColor: '#fff',
   },
   toastContainer: {
@@ -234,6 +270,46 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 1,
     alignItems: 'center',
+  },
+  item: {
+    backgroundColor: Colors.white,
+    padding: 10,
+    borderRadius: 10,
+    width: 170,
+    borderColor: '#ccc',
+    shadowColor: '#ccc',
+    shadowOpacity: 0.5,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    elevation: 5,
+    margin: 10,
+  },
+  image: {
+    width: 150,
+    height: 150,
+    borderRadius: 10,
+    marginBottom: 10,
+
+  },
+
+  itemTxt: {
+    fontSize: 16,
+    fontFamily: 'TimesNewRomanBold',
+    fontWeight: 'bold',
+    // marginVertical:15
+  },
+  itemDescript: {
+    fontFamily: 'TimesNewRomanBold',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  itemPrice: {
+    fontFamily: 'TimesNewRoman',
+    color: '#63f446',
+    fontSize: 16,
+    marginVertical: 5,
   },
   loadingIndicator: {
     flex: 1,

@@ -53,6 +53,8 @@ const Page = () => {
               <MaterialIcons name="person" size={24} color="black" style={styles.icon} />
               <TextInput
                 placeholder="Nom"
+                placeholderTextColor={'grey'}
+
                 style={styles.input}
                 value={nom}
                 // onChangeText={setNom}
@@ -63,6 +65,7 @@ const Page = () => {
               <MaterialIcons name="person" size={24} color="black" style={styles.icon} />
               <TextInput
                 placeholder="Prenom"
+                placeholderTextColor={'grey'}
                 style={styles.input}
                 value={prenom}
                 // onChangeText={setPrenom}
@@ -73,6 +76,8 @@ const Page = () => {
               <MaterialIcons name="call" size={24} color="black" style={styles.icon} />
               <TextInput
                 placeholder="+225 0707070707"
+                placeholderTextColor={'grey'}
+
                 style={styles.input}
                 value={telephone}
                 onChangeText={setTelephone}
@@ -83,6 +88,8 @@ const Page = () => {
               <MaterialIcons name="email" size={24} color="black" style={styles.icon} />
               <TextInput
                 placeholder="E-mail"
+                placeholderTextColor={'grey'}
+
                 style={styles.input}
                 value={email}
                 onChangeText={setEmail}
@@ -92,6 +99,8 @@ const Page = () => {
               <MaterialIcons name="lock" size={24} color="black" style={styles.icon} />
               <TextInput
                 placeholder="Mot de passe"
+                placeholderTextColor={'grey'}
+
                 secureTextEntry={!passwordVisible}
                 style={styles.input}
                 value={password}
@@ -159,7 +168,7 @@ const styles = StyleSheet.create({
     paddingBottom: 25,
   },
   form: {
-    marginBottom: 50,
+    marginBottom: 40,
   },
   inputContainer: {
     flexDirection: 'row',

@@ -23,6 +23,11 @@ const Shopping = () => {
 
   useEffect(() => {
     const initializeData = async () => {
+      if (!user || !user.id) {
+        console.log('Utilisateur non connecté');
+        return;
+      }
+      console.log('Fetching order history for user ID:', user.id);
       if (!user) {
         setModalVisible(true);
       }
@@ -65,6 +70,11 @@ const Shopping = () => {
   };
 
   const handleValidation = async () => {
+    if (!user || !user.id) {
+      console.log('Utilisateur non connecté');
+      Alert.alert('Erreur', 'Veuillez vous connectez.');
+      return;
+    }
     if (!paymentOption) {
       Alert.alert('Erreur', 'Veuillez choisir un mode de paiement.');
       return;
@@ -79,10 +89,12 @@ const Shopping = () => {
   
     const orderData = {
       mode_paiement_id: parseInt(paymentOption, 10),
+      frais_livraison: deliveryFee, 
       montant_commande: totals.total,
       panier_client: panierClient,
-      client_id: user.id, // Include the client_id here
+      client_id: user.id,
     };
+    console.log('Order data:', orderData);
   
     try {
       if (!token) {
@@ -124,6 +136,7 @@ const Shopping = () => {
       }
     }
   };
+  
   
   
   const handleRemoveFromCart = (itemId) => {
@@ -291,18 +304,18 @@ const Shopping = () => {
 
               {paymentOption === '2' && (
                 <View style={styles.paymentOptionsContainer}>
-                  <TouchableOpacity onPress={() => setPaymentMethod('1')}>
+                  <View >
                     <Image source={OrangeMoneyLogo} style={styles.paymentLogo} />
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => setPaymentMethod('2')}>
+                  </View>
+                  <View >
                     <Image source={MoovMoneyLogo} style={styles.paymentLogo} />
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => setPaymentMethod('3')}>
+                  </View>
+                  <View >
                     <Image source={WaveMoneyLogo} style={styles.paymentLogo} />
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => setPaymentMethod('4')}>
+                  </View>
+                  <View >
                     <Image source={MtnMoneyLogo} style={styles.paymentLogo} />
-                  </TouchableOpacity>
+                  </View>
                 </View>
               )}
             </View>

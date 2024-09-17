@@ -17,7 +17,9 @@ const Page = () => {
     const handleRegister = () => {
         navigation.navigate('register');
     };
-
+    const handlePassword = () => {
+        navigation.navigate('PasswordRemove');
+    };
     const handleValidation = async () => {
         try {
             console.log('Tentative de connexion avec:', { telephone, password_user });
@@ -28,7 +30,7 @@ const Page = () => {
             console.log('Réponse de l\'API:', response.data);
             if (response.data.status === 'success') {
                 const { result, accessToken } = response.data;
-                setUser(result); // Mettre à jour les informations utilisateur dans le contexte
+                setUser({ ...result, accessToken });
                 setToken(accessToken); // Mettre à jour le token dans le contexte
                 navigation.navigate('(tabs)');
             } else {
@@ -47,41 +49,48 @@ const Page = () => {
             <View style={styles.container2}>
                 <Text style={styles.title}>Connectez-vous</Text>
                 <ScrollView>
-                <View style={styles.form}>
-                    <View style={styles.inputContainer}>
-                        <MaterialIcons name="call" size={24} color="black" style={styles.icon} />
-                        <TextInput
-                            placeholder="Numero de téléphone"
-                            style={styles.input}
-                            value={telephone}
-                            onChangeText={setLogin_user}
-                            keyboardType="numeric"
-                        />
+                    <View style={styles.form}>
+                        <View style={styles.inputContainer}>
+                            <MaterialIcons name="call" size={24} color="black" style={styles.icon} />
+                            <TextInput
+                                placeholder="0707070707"
+                                style={styles.input}
+                                placeholderTextColor={'grey'}
+
+                                value={telephone}
+                                onChangeText={setLogin_user}
+                                keyboardType="numeric"
+                            />
+                        </View>
+                        <View style={styles.inputContainer}>
+                            <MaterialIcons name="lock" size={24} color="black" style={styles.icon} />
+                            <TextInput
+                                placeholder="Mot de passe"
+                                placeholderTextColor={'grey'}
+                                secureTextEntry={!passwordVisible}
+                                style={styles.input}
+                                value={password_user}
+                                onChangeText={setPassword_user}
+                            />
+                            <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)}>
+                                <MaterialIcons name={passwordVisible ? 'visibility' : 'visibility-off'} size={24} color="black" />
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                    <View style={styles.inputContainer}>
-                        <MaterialIcons name="lock" size={24} color="black" style={styles.icon} />
-                        <TextInput
-                            placeholder="Mot de passe"
-                            secureTextEntry={!passwordVisible}
-                            style={styles.input}
-                            value={password_user}
-                            onChangeText={setPassword_user}
-                        />
-                        <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)}>
-                            <MaterialIcons name={passwordVisible ? 'visibility' : 'visibility-off'} size={24} color="black" />
+                    <View style={styles.position}>
+
+                        <TouchableOpacity style={styles.validationButton} onPress={handleValidation}>
+                            <Text style={styles.validationButtonText}>SE CONNECTER</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={handleRegister}>
+                            <Text style={styles.lienText}>Créez un compte</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={handlePassword}>
+                            <Text style={styles.lienText}>Mot de passe oublié</Text>
                         </TouchableOpacity>
                     </View>
-                </View>
-                <View style={styles.position}>
-                    <TouchableOpacity style={styles.validationButton} onPress={handleValidation}>
-                        <Text style={styles.validationButtonText}>SE CONNECTER</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={handleRegister}>
-                        <Text style={styles.lienText}>Créez un compte</Text>
-                    </TouchableOpacity>
-                </View>
                 </ScrollView>
-               
+
             </View>
         </SafeAreaProvider>
     );

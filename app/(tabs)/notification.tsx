@@ -1,40 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity, Image } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
+import { Stack, useNavigation, useRouter } from 'expo-router';
 import axios from 'axios';
-import { useUser } from '@/context/UserContext'; // Adjust the import according to your UserContext location
+import { useUser } from '@/context/UserContext'; // Assurez-vous d'ajuster l'import selon l'emplacement réel de UserContext
 
 const Notification = () => {
   const { user, token } = useUser();
   const [orderHistory, setOrderHistory] = useState([]);
   const [orderStatuses, setOrderStatuses] = useState([]);
+  const [loading, setLoading] = useState(true); // État pour gérer l'affichage de chargement
   const router = useRouter();
   const Plat = require('@/assets/images/plats.jpg');
-
+  const navigation = useNavigation();
   useEffect(() => {
     const fetchOrderHistory = async () => {
       if (!user || !user.id) {
-        console.log('User not logged in or user ID missing');
+        console.log('Utilisateur non connecté ou ID utilisateur manquant');
+        setLoading(false); // Définir loading à false pour afficher un message par défaut
         return;
       }
-      console.log('Fetching order history for user ID:', user.id);
+      console.log('Récupération de l\'historique des commandes pour l\'utilisateur ID:', user.id);
       try {
         const response = await axios.get('https://api.mahanaiim.ci/api/commandes/liste-commande-client', {
           params: {
-            userId: user.id, // Ensure this is the correct parameter name
+            userId: user.id, // Assurez-vous que c'est le bon nom de paramètre
           },
           headers: {
             Authorization: `Bearer ${token}`,
           }
         });
-        console.log('Order history response:', response.data);
+        console.log('Réponse de l\'historique des commandes:', response.data);
         if (response.data.statut === 'succes') {
           setOrderHistory(response.data.resultat);
         } else {
-          console.error('API returned an error:', response.data.message);
+          console.error('L\'API a retourné une erreur:', response.data.message);
         }
       } catch (error) {
-        console.error('Failed to fetch order history:', error.response ? error.response.data : error.message);
+        console.error('Échec de récupération de l\'historique des commandes:', error.response ? error.response.data : error.message);
+      } finally {
+        setLoading(false); // Définir loading à false après l'appel API
       }
     };
 
@@ -43,7 +47,7 @@ const Notification = () => {
         const response = await axios.get('https://api.mahanaiim.ci/api/configuration/liste-etat-commande');
         setOrderStatuses(response.data.resultat);
       } catch (error) {
-        console.error('Failed to fetch order statuses:', error.response ? error.response.data : error.message);
+        console.error('Échec de récupération des états des commandes:', error.response ? error.response.data : error.message);
       }
     };
 
@@ -53,25 +57,33 @@ const Notification = () => {
 
   const getOrderStatus = (id) => {
     const status = orderStatuses.find(status => status.id === id);
-    return status ? status.libelle : 'Unknown';
+    return status ? status.libelle : 'Inconnu';
   };
 
-  const renderItem = ({ item }) => (
-    <View style={styles.card}>
-      <Image source={Plat} style={styles.image} />
-      <View style={styles.cardContent}>
-        <Text style={styles.title}>Commande N°: {item.id}</Text>
-        <Text style={styles.subtitle}>Nombre de produits: {item.liste_produit.length}</Text>
-        <Text style={styles.subtitle}>État de la commande: {getOrderStatus(item.etat_id)}</Text>
-        <TouchableOpacity 
-          style={styles.detailsButton}
-          onPress={() => router.push({ pathname: 'orderDetails', params: { order: item } })}
-        >
-          <Text style={styles.detailsButtonText}>Voir les détails</Text>
-        </TouchableOpacity>
+  const renderItem = ({ item }) => {
+    console.log('Rendu de l\'élément:', item);
+    return (
+      <View style={styles.card}>
+        <Image source={Plat} style={styles.image} />
+        <View style={styles.cardContent}>
+          <Text style={styles.title}>Commande N°: {item.id}</Text>
+          {item.liste_produit && (
+            <Text style={styles.subtitle}>Nombre de produits: {item.liste_produit.length}</Text>
+          )}
+          <Text style={styles.subtitle}>État de la commande: {getOrderStatus(item.etat)}</Text>
+          <TouchableOpacity 
+            style={styles.detailsButton}
+            onPress={() => navigation.navigate('OrderDetails', { order: item })}
+          >
+            <Text style={styles.detailsButtonText}>Voir les détails</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
+
+  // Message par défaut lors du chargement ou si aucune commande n'a été trouvée
+  const defaultMessage = loading ? "Chargement en cours..." : "Aucune commande passée.";
 
   return (
     <>
@@ -84,7 +96,7 @@ const Notification = () => {
       <SafeAreaView style={styles.container}>
         <View style={styles.containerView}>
           {orderHistory.length === 0 ? (
-            <Text style={styles.emptyMessage}>Aucune commande passée.</Text>
+            <Text style={styles.emptyMessage}>{defaultMessage}</Text>
           ) : (
             <FlatList
               data={orderHistory}

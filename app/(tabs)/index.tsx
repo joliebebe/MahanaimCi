@@ -1,10 +1,9 @@
-import React, { useContext, useEffect, useState, useCallback } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, Image, TextInput, ScrollView, FlatList, ActivityIndicator } from 'react-native';
 import { Link, Stack } from 'expo-router';
 import { useHeaderHeight } from '@react-navigation/elements';
 import Colors from '@/constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
 import CategoryButtons from '../../components/CategoryButtons';
 import CarouselScreen from '@/components/carousel';
 import { modalType } from '@/types/modalType';
@@ -12,60 +11,36 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { UserContext } from '@/context/UserContext';
 import { ImageContext } from '@/context/ImageContext';
 import axios from 'axios';
-import { useFocusEffect } from '@react-navigation/native';
+import { SearchBar } from '@rneui/themed';
+import { color } from '@rneui/base';
+import DropdownMenu from '@/components/DropdownMenu';
 
 const Page = () => {
     const headerHeight = useHeaderHeight();
-    const { user, setUser, token } = useContext(UserContext);
+    const { user } = useContext(UserContext);
     const { selectedImage } = useContext(ImageContext);
     const [modalData, setModalData] = useState<modalType[]>([]);
     const [loading, setLoading] = useState(true);
-    const [searchText, setSearchText] = useState('');
-    const [filteredData, setFilteredData] = useState<modalType[]>([]);
-    const [categories, setCategories] = useState([]);
-    const [filteredProducts, setFilteredProducts] = useState([]);
+    const [search, setSearch] = useState("");
+
+    const updateSearch = (search) => {
+        setSearch(search);
+    };
+    useEffect(() => {
+        fetchPrestationsPro();
+    }, []);
 
     const fetchPrestationsPro = async () => {
         try {
-            const response = await axios.get('https://api.mahanaiim.ci/api/client/liste-des-categories', {
-                headers: {
-                    Authorization: `Bearer ${token}`  // Use token for authorization
-                }
-            });
+            const response = await axios.get('https://api.mahanaiim.ci/api/client/liste-des-categories');
             const prestationsPro = response.data.resultat.prestations_pro;
-            const categoriesData = response.data.resultat.categories;
             setModalData(prestationsPro);
-            setCategories(categoriesData);  // Correctly set categories data
             setLoading(false);
         } catch (error) {
             console.error("Error fetching prestations pro:", error);
             setLoading(false);
         }
     };
-
-    useFocusEffect(
-        useCallback(() => {
-            fetchPrestationsPro();
-            // fetchCategories();
-        }, [token])  // Fetch data whenever token changes
-    );
-
-    useEffect(() => {
-        console.log('Categories:', categories);
-        console.log('Search Text:', searchText);
-        if (searchText === '') {
-            const allProducts = categories.flatMap(category => category.produits || []);
-            setFilteredProducts(allProducts);
-        } else {
-            const filtered = categories.flatMap(category =>
-                category.produits.filter(product =>
-                    product.libelle.toLowerCase().includes(searchText.toLowerCase()) ||
-                    product.description.toLowerCase().includes(searchText.toLowerCase())
-                )
-            );
-            setFilteredProducts(filtered);
-        }
-    }, [searchText, categories]);
 
     const renderItems = ({ item }) => (
         <Link href={`/modal/${item.id}`} asChild>
@@ -76,14 +51,14 @@ const Page = () => {
                         style={styles.image}
                     />
                     <Text style={styles.itemTxt} numberOfLines={1} ellipsizeMode="tail">{item.libelle}</Text>
-                    <Text style={styles.itemPrice}>{item.prix} FCFA</Text>
+                    <Text style={styles.itemPrice}>{item.prix}</Text>
                 </View>
             </TouchableOpacity>
         </Link>
     );
-
     const [showDropdown, setShowDropdown] = useState(false);
-    const handleCategoryChange = (category) => {
+
+    const handleCategoryChange = (category: string) => {
         console.log("Selected category:", category);
     };
 
@@ -104,18 +79,14 @@ const Page = () => {
                         style={styles.container}
                     >
                         <View>
-                            <View style={{ margin: 5, marginHorizontal: 15, paddingTop: 30 }}>
-                                {user ? (
-                                    <Text style={styles.titre}>
-                                        {user && user.nom ? <Text style={styles.titre}>{user.nom}</Text> : "Utilisateur"}
-                                    </Text>
-                                ) : (
-                                    <Text style={styles.titre}></Text>
-                                )}
+                            <View style={{ margin: 5, marginHorizontal: 15, paddingTop: 25 , bottom:22}}>
+                               {/*  <Text style={styles.titre}>
+                                    Akwaba, {user && user.nom ? <Text style={styles.titre}>{user.nom}</Text> : "Utilisateur"}
+                                </Text> */}
                             </View>
                             <View style={{ flexDirection: 'row', marginHorizontal: 15, alignItems: 'center' }}>
                                 <View style={{ flex: 1 }}>
-                                    <Text style={styles.titre}>Akwaba {'\n'}sur le marché{'\n'}MAHANAIIM.CI</Text>
+                                    <Text style={styles.titre}>Akwaba, {user && user.nom ? <Text style={styles.titre}>{user.nom}</Text> : ""} {'\n'}sur le marché{'\n'}MAHANAIIM.CI</Text>
                                 </View>
                                 <View style={styles.iconContainer}>
                                     {selectedImage ? (
@@ -125,19 +96,13 @@ const Page = () => {
                                     )}
                                 </View>
                             </View>
-                            <View style={styles.searchSectionWrapper}>
-                                <View style={styles.searchBar}>
-                                    <TextInput
-                                        placeholder="Recherche ici"
-                                        placeholderTextColor="#fff"
-                                        style={{ flex: 1, color: Colors.white }}
-                                        value={searchText}
-                                        onChangeText={setSearchText}
-                                    />
-                                    <Ionicons name='search' size={24} style={{ marginLeft: 10, color: Colors.white }} />
-                                </View>
-                            </View>
-                            <CategoryButtons onCategoryChange={handleCategoryChange} setShowDropdown={setShowDropdown} />
+                           
+                            {/* <CategoryButtons onCategoryChange={handleCategoryChange} setShowDropdown={setShowDropdown} /> */}
+                            {/* 
+                                ici je veux mettre un menu des boutons deroulante de droite à gauche
+                                dit moi si je dois creer un nouveau fichier de menu et l'importer ici 
+                            */}
+                            <DropdownMenu onCategoryChange={handleCategoryChange} />
                             <View style={styles.guideContainer}>
                                 <Text style={styles.guideText}>Guide de fonctionnement</Text>
                             </View>
@@ -147,25 +112,27 @@ const Page = () => {
                         </View>
                         <View style={styles.Prestation}>
                             <Text style={styles.PrestationText1}>Prestation Pro</Text>
+                            {/* <Text style={styles.PrestationText2}>Plus</Text> */}
                         </View>
                         <View style={{ margin: 5, marginHorizontal: 15, marginBottom: 20 }}>
                             <Text style={{ fontFamily: 'TimesNewRoman', fontSize: 20 }}>
                                 Nous envoyons des professionnels à votre porte, selon votre delai et votre budget
                             </Text>
                         </View>
-                        <View>
-                            {loading ? (
-                                <ActivityIndicator size="large" color="#0000ff" />
-                            ) : (
-                                <FlatList
-                                    data={modalData}  
-                                    renderItem={renderItems}
-                                    horizontal
-                                    showsHorizontalScrollIndicator={false}
-                                />
-                            )}
-                        </View>
                     </LinearGradient>
+        
+                    <View style={{backgroundColor: '#fff'}}>
+                        {loading ? (
+                            <ActivityIndicator size="large" color="#0000ff" />
+                        ) : (
+                            <FlatList
+                                data={modalData}
+                                renderItem={renderItems}
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                            />
+                        )}
+                    </View>
                 </ScrollView>
             </SafeAreaProvider>
         </>
@@ -207,10 +174,11 @@ const styles = StyleSheet.create({
         color: Colors.white,
     },
     searchBar: {
-        flexDirection: 'row',
-        backgroundColor: Colors.bgColorsgreen,
-        borderRadius: 10,
-        padding: 10,
+        // flexDirection: 'row',
+        //backgroundColor: Colors.bgColorsgreen,
+        borderRadius: 50,
+        paddingHorizontal: 10,
+
     },
     scrollContainer: {
         flexDirection: 'row',
@@ -226,6 +194,7 @@ const styles = StyleSheet.create({
         borderColor: 'lightgrey',
         marginBottom: 15,
         marginHorizontal: 15,
+
     },
     guideText: {
         color: '#fff',
@@ -244,13 +213,20 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         marginHorizontal: 15,
         alignItems: 'center',
+
     },
     PrestationText1: {
         color: '#fff',
         fontSize: 20,
-        fontFamily: 'TimesNewRoman',
+        fontFamily: 'TimesNewRomanBold',
         margin: 6,
         flex: 1,
+    },
+    PrestationText2: {
+        marginLeft: 10,
+        color: '#fff',
+        fontSize: 20,
+        fontFamily: 'TimesNewRoman',
     },
     item: {
         backgroundColor: Colors.white,
@@ -272,11 +248,14 @@ const styles = StyleSheet.create({
         height: 150,
         borderRadius: 10,
         marginBottom: 10,
+
     },
+
     itemTxt: {
         fontSize: 16,
         fontFamily: 'TimesNewRomanBold',
         fontWeight: 'bold',
+        // marginVertical:15
     },
     itemDescript: {
         fontFamily: 'TimesNewRomanBold',
@@ -289,4 +268,4 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginVertical: 5,
     },
-});
+})
