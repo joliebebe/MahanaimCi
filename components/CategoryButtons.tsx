@@ -7,9 +7,10 @@ import DropdownList from './DropdownList';
 type Props = {
     onCategoryChange: (category: string) => void;
     setShowDropdown: (show: boolean) => void;
+    handleCategoryChange: (category: string) => void;
 };
 
-const CategoryButtons = ({ onCategoryChange, setShowDropdown }: Props) => {
+const CategoryButtons = ({ onCategoryChange, setShowDropdown, handleCategoryChange }: Props) => {
     const scrollRef = useRef<ScrollView>(null);
     const itemRef = useRef<(TouchableOpacity | null)[]>([]);
     const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -41,6 +42,7 @@ const CategoryButtons = ({ onCategoryChange, setShowDropdown }: Props) => {
             setDropdownOpen(true);
             onCategoryChange(categories[index]);
             setShowDropdown(true);
+            //handleCategoryChange(categories[index]);
         }
 
         const selected = itemRef.current[index];
@@ -82,7 +84,7 @@ const CategoryButtons = ({ onCategoryChange, setShowDropdown }: Props) => {
                         console.log('Res', categoryResto);
                     }}
                     selectedCategoryTitle={categories[activeIndex]}
-                    categoryDetails={categories[activeIndex]}  // Assuming you have the details somewhere
+                    categoryDetails={categories[activeIndex]} // Assuming you have the details somewhere
                 />
             )}
         </View>

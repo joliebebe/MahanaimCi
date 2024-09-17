@@ -1,21 +1,21 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { useFonts } from 'expo-font';
+import React, { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import React, { useEffect } from 'react';
+import { useFonts } from 'expo-font';
 import { CartProvider } from '@/context/CartContext';
 import { UserProvider } from '@/context/UserContext';
 import { ImageProvider } from '@/context/ImageContext';
+import Toast from 'react-native-toast-message';
+import { FontAwesome } from '@expo/vector-icons';
+import initializeAppData from '@/api/initializeAppData'; // Importez la fonction d'initialisation
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
+  ErrorBoundary, // Catch any errors thrown by the Layout component.
 } from 'expo-router';
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: 'login',
-
+  initialRouteName: 'login', // Ensure that reloading on `/modal` keeps a back button present.
 };
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -28,26 +28,37 @@ export default function RootLayout() {
     ...FontAwesome.font,
   });
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
-    if (error) throw error;
-  }, [error]);
+    const initializeData = async () => {
+      try {
+        // Vérifie si les données ont déjà été chargées
+        const dataAlreadyLoaded = await AsyncStorage.getItem('dataLoaded');
+        if (!dataAlreadyLoaded) {
+          await initializeAppData();
+          await AsyncStorage.setItem('dataLoaded', 'true');
+          SplashScreen.hideAsync();
+        } else {
+          SplashScreen.hideAsync();
+        }
+      } catch (error) {
+        console.error('Failed to initialize app data:', error);
+        // Gérer les erreurs d'initialisation ici
+      }
+    };
 
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
+    if (loaded && !error) {
+      initializeData();
     }
-  }, [loaded]);
+  }, [loaded, error]);
 
   if (!loaded) {
-    return null;
+    return null; // Return null while fonts are loading
   }
 
   return <RootLayoutNav />;
 }
 
 function RootLayoutNav() {
-
   return (
     <UserProvider>
       <CartProvider>
@@ -57,13 +68,9 @@ function RootLayoutNav() {
             <Stack.Screen name='register' options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           </Stack>
+          <Toast />
         </ImageProvider>
-
       </CartProvider>
     </UserProvider>
-
-
-
-
   );
 }

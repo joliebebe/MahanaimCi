@@ -42,35 +42,41 @@ const Page = () => {
             quality: 1,
         });
 
-        if (result.canceled) {
+        if (result.cancelled) {
             alert('You did not select any image.');
         } else if (result.assets) {
             setSelectedImage(result.assets[0].uri);
         }
     };
 
-    React.useLayoutEffect(() => {
-        navigation.setOptions({
-            headerRight: () => (
-                <MaterialIcons
-                    name="exit-to-app"
-                    size={24}
-                    color="#8b8745"
-                    style={{ marginRight: 15 }}
-                    onPress={() => {
-                        navigation.navigate('login');
-                    }}
-                />
-            ),
-        });
-    }, [navigation]);
+    const handleEditProfile = () => {
+        // Vérifier si l'utilisateur est connecté
+        if (!user) {
+            navigation.navigate('login'); // Rediriger vers la page de connexion si l'utilisateur n'est pas connecté
+            return;
+        }
+
+        // Naviguer vers la page de modification du profil
+        navigation.navigate('EditProfile');
+    };
 
     return (
         <>
             <Stack.Screen
                 options={{
-                    headerTransparent: true,
-                    headerTitle: "",
+                    headerTransparent: false,
+                    headerTitle: "Profil",
+                    headerRight: () => (
+                        <MaterialIcons
+                            name="exit-to-app"
+                            size={24}
+                            color="#8b8745"
+                            style={{ marginRight: 15 }}
+                            onPress={() => {
+                                navigation.navigate('login');
+                            }}
+                        />
+                    ),
                 }}
             />
             <SafeAreaProvider>
@@ -96,7 +102,7 @@ const Page = () => {
                         </View>
                     </TouchableOpacity>
 
-                    <Text style={styles.name}>{user && user.nom ? user.nom : "Utilisateur"}</Text>
+                    <Text style={styles.name}>{user && user.nom ? user.nom : "Mon Compte"}</Text>
 
                     <View style={styles.locationContainer}>
                         <MaterialIcons name="location-on" size={24} color="#8b8745" />
@@ -106,26 +112,30 @@ const Page = () => {
                     </View>
 
                     <View style={styles.guideContainer}>
-                        <Text style={styles.guideText}>564</Text>
-                        <Text style={styles.guideText1}>Transactions</Text>
+                        <TouchableOpacity onPress={handleEditProfile}>
+                            <Text style={styles.editButtonText}>Mahanaiim{'\n'}Modifier</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.content}>
+                        {/* Contenu principal */}
                     </View>
 
                     <View style={styles.form}>
                         <View style={styles.inputContainer}>
                             <Text style={styles.guideText1}>Nom</Text>
-                            <Text style={styles.guideText1}>{user && user.nom ? user.nom : "Utilisateur"}</Text>
+                            <Text style={styles.guideText1}>{user && user.nom ? user.nom : ""}</Text>
                         </View>
                         <View style={styles.inputContainer}>
                             <Text style={styles.guideText1}>Prénoms</Text>
-                            <Text style={styles.guideText1}>{user && user.prenom ? user.prenom : "Utilisateur"}</Text>
+                            <Text style={styles.guideText1}>{user && user.prenom ? user.prenom : ""}</Text>
                         </View>
                         <View style={styles.inputContainer}>
                             <Text style={styles.guideText1}>Email</Text>
-                            <Text style={styles.guideText1}>{user && user.email ? user.email : "Utilisateur"}</Text>
+                            <Text style={styles.guideText1}>{user && user.email ? user.email : ""}</Text>
                         </View>
                         <View style={styles.inputContainer}>
                             <Text style={styles.guideText1}>Téléphone</Text>
-                            <Text style={styles.guideText1}>{user && user.telephone ? user.telephone : "Utilisateur"}</Text>
+                            <Text style={styles.guideText1}>{user && user.telephone ? user.telephone : ""}</Text>
                         </View>
                     </View>
                 </View>
@@ -135,12 +145,14 @@ const Page = () => {
 };
 
 export default Page;
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'center',
         backgroundColor: '#fff',
+        paddingTop: 20,
+        justifyContent: 'flex-start', 
     },
     profilePictureContainer1: {
         width: 140,
@@ -187,39 +199,42 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     locationText: {
-        fontSize: 18,
+       fontSize: 16,
         fontFamily: 'TimesNewRoman',
         marginRight: 5,
         color: "#8b8745",
     },
     editIconContainer: {
-      position: 'absolute',
-      bottom: 0,
-      right: 0,
-      backgroundColor: '#8b8745',
-      padding: 4,
-      borderRadius: 15,
-      overflow: 'hidden', // Pour s'assurer que l'icône est correctement masquée par le bord arrondi
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        backgroundColor: '#8b8745',
+        padding: 4,
+        borderRadius: 15,
+        overflow: 'hidden', // Pour s'assurer que l'icône est correctement masquée par le bord arrondi
     },
     guideContainer: {
         backgroundColor: '#8b8745',
-        padding: 90,
+        paddingHorizontal: 90,
         paddingVertical: 15,
         borderRadius: 15,
         borderWidth: 1,
         borderColor: 'lightgrey',
         margin: 25,
+        alignSelf: 'center',
+
     },
     guideText: {
         color: '#000',
-        fontSize: 20,
+       fontSize: 16,
         fontFamily: 'TimesNewRoman',
-        margin: 6,
+        marginTop: 6,
         alignSelf: 'center',
+        alignItems:'center'
     },
     guideText1: {
         color: '#000000',
-        fontSize: 16,
+       fontSize: 16,
         fontFamily: 'TimesNewRoman',
         margin: 6,
         alignSelf: 'center',
@@ -228,6 +243,7 @@ const styles = StyleSheet.create({
         width: '100%',
         padding: 10,
         justifyContent: 'space-between',
+        flexDirection: 'column', 
     },
     inputContainer: {
         flexDirection: 'row',
@@ -235,9 +251,27 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderBottomWidth: 1,
         borderColor: 'lightgrey',
+        marginBottom: 10,
+    },
+    editButton: {
+        backgroundColor: '#8b8745',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 10,
+        alignSelf: 'center',
         marginBottom: 20,
     },
-    icon: {
-        marginRight: 10,
+    editButtonText: {
+        color: '#fff',
+       fontSize: 18,
+        fontFamily: 'TimesNewRoman',
+        alignSelf: 'center',
+        textAlign:'center'
+    },
+    content: {
+        flex: 1,
+        width: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });

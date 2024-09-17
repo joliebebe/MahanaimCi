@@ -13,10 +13,8 @@ type Props = {
 };
 
 const DropdownList = ({ onCategoryProd, onCategoryResto, onCategoryChange, selectedCategoryTitle, categoryDetails }: Props) => {
-    const [selectedOptionProd, setSelectedOptionProd] = useState<number | null>(null);
-    const [selectedOptionResto, setSelectedOptionResto] = useState<number | null>(null);
-    const [isOpenProd, setIsOpenProd] = useState<boolean[]>([]);
-    const [isOpenResto, setIsOpenResto] = useState<boolean[]>([]);
+    const [selectedOption, setSelectedOption] = useState<number | null>(null);
+    const [isOpen, setIsOpen] = useState<boolean[]>([]);
     const [loading, setLoading] = useState(true);
     const [subCategories, setSubCategories] = useState<any[]>([]);
 
@@ -33,8 +31,7 @@ const DropdownList = ({ onCategoryProd, onCategoryResto, onCategoryChange, selec
             const category = response.data.resultat.categories.find((cat: any) => cat.libelle === categoryTitle);
             if (category) {
                 setSubCategories(category.sous_categories);
-                setIsOpenProd(Array(category.sous_categories.length).fill(false));
-                setIsOpenResto(Array(category.sous_categories.length).fill(false));
+                setIsOpen(Array(category.sous_categories.length).fill(false));
             }
             setLoading(false);
         } catch (error) {
@@ -44,17 +41,14 @@ const DropdownList = ({ onCategoryProd, onCategoryResto, onCategoryChange, selec
     };
 
     const handleOptionSelect = (index: number, type: string) => {
+        const updatedIsOpen = [...isOpen];
+        updatedIsOpen[index] = !updatedIsOpen[index];
+        setIsOpen(updatedIsOpen);
+        setSelectedOption(index);
+
         if (type === 'prod') {
-            const updatedIsOpenProd = [...isOpenProd];
-            updatedIsOpenProd[index] = !updatedIsOpenProd[index];
-            setIsOpenProd(updatedIsOpenProd);
-            setSelectedOptionProd(index);
             onCategoryProd(subCategories[index].libelle);
         } else if (type === 'resto') {
-            const updatedIsOpenResto = [...isOpenResto];
-            updatedIsOpenResto[index] = !updatedIsOpenResto[index];
-            setIsOpenResto(updatedIsOpenResto);
-            setSelectedOptionResto(index);
             onCategoryResto(subCategories[index].libelle);
         }
 
@@ -67,48 +61,25 @@ const DropdownList = ({ onCategoryProd, onCategoryResto, onCategoryChange, selec
 
     return (
         <View style={styles.container}>
-            {selectedCategoryTitle === "Resto" && (
-                subCategories.map((item: any, index: number) => (
-                    <View key={index}>
-                        <TouchableOpacity
-                            onPress={() => handleOptionSelect(index, 'resto')}
-                            style={styles.header}
-                        >
-                            <Text style={styles.headerText}>{item.libelle}</Text>
-                            <Ionicons style={styles.icon} name={isOpenResto[index] ? 'chevron-down-outline' : 'chevron-forward'} size={20} color="black" />
-                        </TouchableOpacity>
-                        {isOpenResto[index] && (
-                            <View style={styles.optionsContainer}>
-                                <CategoryDetailsButtons
-                                    onCategoryDetailsChange={onCategoryChange}
-                                    CategoriesDetails={item.produits}
-                                />
-                            </View>
-                        )}
-                    </View>
-                ))
-            )}
-            {selectedCategoryTitle === "Marque de produit locaux" && (
-                subCategories.map((item: any, index: number) => (
-                    <View key={index}>
-                        <TouchableOpacity
-                            onPress={() => handleOptionSelect(index, 'prod')}
-                            style={styles.header}
-                        >
-                            <Text style={styles.headerText}>{item.libelle}</Text>
-                            <Ionicons style={styles.icon} name={isOpenProd[index] ? 'chevron-down-outline' : 'chevron-forward'} size={20} color="black" />
-                        </TouchableOpacity>
-                        {isOpenProd[index] && (
-                            <View style={styles.optionsContainer}>
-                                <CategoryDetailsButtons
-                                    onCategoryDetailsChange={onCategoryChange}
-                                    CategoriesDetails={item.produits}
-                                />
-                            </View>
-                        )}
-                    </View>
-                ))
-            )}
+            {subCategories.map((item: any, index: number) => (
+                <View key={index}>
+                    <TouchableOpacity
+                        onPress={() => handleOptionSelect(index, selectedCategoryTitle === 'Resto' ? 'resto' : 'prod')}
+                        style={styles.header}
+                    >
+                        <Text style={styles.headerText}>{item.libelle}</Text>
+                        <Ionicons style={styles.icon} name={isOpen[index] ? 'chevron-down-outline' : 'chevron-forward'} size={20} color="black" />
+                    </TouchableOpacity>
+                    {isOpen[index] && (
+                        <View style={styles.optionsContainer}>
+                            <CategoryDetailsButtons
+                                onCategoryDetailsChange={onCategoryChange}
+                                selectedSubCategory={item} // Pass the selected sub-category
+                            />
+                        </View>
+                    )}
+                </View>
+            ))}
         </View>
     );
 };

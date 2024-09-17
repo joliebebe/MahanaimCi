@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, Image, TextInput, ScrollView, FlatList, ActivityIndicator } from 'react-native';
 import { Link, Stack } from 'expo-router';
 import { useHeaderHeight } from '@react-navigation/elements';
@@ -12,29 +12,60 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { UserContext } from '@/context/UserContext';
 import { ImageContext } from '@/context/ImageContext';
 import axios from 'axios';
+import { useFocusEffect } from '@react-navigation/native';
 
 const Page = () => {
     const headerHeight = useHeaderHeight();
-    const { user } = useContext(UserContext);
+    const { user, setUser, token } = useContext(UserContext);
     const { selectedImage } = useContext(ImageContext);
     const [modalData, setModalData] = useState<modalType[]>([]);
     const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        fetchPrestationsPro();
-    }, []);
+    const [searchText, setSearchText] = useState('');
+    const [filteredData, setFilteredData] = useState<modalType[]>([]);
+    const [categories, setCategories] = useState([]);
+    const [filteredProducts, setFilteredProducts] = useState([]);
 
     const fetchPrestationsPro = async () => {
         try {
-            const response = await axios.get('https://api.mahanaiim.ci/api/client/liste-des-categories');
+            const response = await axios.get('https://api.mahanaiim.ci/api/client/liste-des-categories', {
+                headers: {
+                    Authorization: `Bearer ${token}`  // Use token for authorization
+                }
+            });
             const prestationsPro = response.data.resultat.prestations_pro;
+            const categoriesData = response.data.resultat.categories;
             setModalData(prestationsPro);
+            setCategories(categoriesData);  // Correctly set categories data
             setLoading(false);
         } catch (error) {
             console.error("Error fetching prestations pro:", error);
             setLoading(false);
         }
     };
+
+    useFocusEffect(
+        useCallback(() => {
+            fetchPrestationsPro();
+            // fetchCategories();
+        }, [token])  // Fetch data whenever token changes
+    );
+
+    useEffect(() => {
+        console.log('Categories:', categories);
+        console.log('Search Text:', searchText);
+        if (searchText === '') {
+            const allProducts = categories.flatMap(category => category.produits || []);
+            setFilteredProducts(allProducts);
+        } else {
+            const filtered = categories.flatMap(category =>
+                category.produits.filter(product =>
+                    product.libelle.toLowerCase().includes(searchText.toLowerCase()) ||
+                    product.description.toLowerCase().includes(searchText.toLowerCase())
+                )
+            );
+            setFilteredProducts(filtered);
+        }
+    }, [searchText, categories]);
 
     const renderItems = ({ item }) => (
         <Link href={`/modal/${item.id}`} asChild>
@@ -50,9 +81,9 @@ const Page = () => {
             </TouchableOpacity>
         </Link>
     );
-    const [showDropdown, setShowDropdown] = useState(false);
 
-    const handleCategoryChange = (category: string) => {
+    const [showDropdown, setShowDropdown] = useState(false);
+    const handleCategoryChange = (category) => {
         console.log("Selected category:", category);
     };
 
@@ -73,14 +104,18 @@ const Page = () => {
                         style={styles.container}
                     >
                         <View>
-                            <View style={{ margin: 5, marginHorizontal: 15, paddingTop: 25 }}>
-                                <Text style={styles.titre}>
-                                    Akwaba, {user && user.nom ? <Text style={styles.titre}>{user.nom}</Text> : "Utilisateur"}
-                                </Text>
+                            <View style={{ margin: 5, marginHorizontal: 15, paddingTop: 30 }}>
+                                {user ? (
+                                    <Text style={styles.titre}>
+                                        {user && user.nom ? <Text style={styles.titre}>{user.nom}</Text> : "Utilisateur"}
+                                    </Text>
+                                ) : (
+                                    <Text style={styles.titre}></Text>
+                                )}
                             </View>
                             <View style={{ flexDirection: 'row', marginHorizontal: 15, alignItems: 'center' }}>
                                 <View style={{ flex: 1 }}>
-                                    <Text style={styles.titre}>Bienvenue {'\n'}sur le marché{'\n'}MAHANAIIM.CI</Text>
+                                    <Text style={styles.titre}>Akwaba {'\n'}sur le marché{'\n'}MAHANAIIM.CI</Text>
                                 </View>
                                 <View style={styles.iconContainer}>
                                     {selectedImage ? (
@@ -92,12 +127,17 @@ const Page = () => {
                             </View>
                             <View style={styles.searchSectionWrapper}>
                                 <View style={styles.searchBar}>
-                                    <TextInput placeholder="Recherche ici" placeholderTextColor="#fff" style={{ flex: 1, color: Colors.white }} />
+                                    <TextInput
+                                        placeholder="Recherche ici"
+                                        placeholderTextColor="#fff"
+                                        style={{ flex: 1, color: Colors.white }}
+                                        value={searchText}
+                                        onChangeText={setSearchText}
+                                    />
                                     <Ionicons name='search' size={24} style={{ marginLeft: 10, color: Colors.white }} />
                                 </View>
                             </View>
                             <CategoryButtons onCategoryChange={handleCategoryChange} setShowDropdown={setShowDropdown} />
-
                             <View style={styles.guideContainer}>
                                 <Text style={styles.guideText}>Guide de fonctionnement</Text>
                             </View>
@@ -107,26 +147,25 @@ const Page = () => {
                         </View>
                         <View style={styles.Prestation}>
                             <Text style={styles.PrestationText1}>Prestation Pro</Text>
-                            <Text style={styles.PrestationText2}>Plus</Text>
                         </View>
                         <View style={{ margin: 5, marginHorizontal: 15, marginBottom: 20 }}>
                             <Text style={{ fontFamily: 'TimesNewRoman', fontSize: 20 }}>
                                 Nous envoyons des professionnels à votre porte, selon votre delai et votre budget
                             </Text>
                         </View>
+                        <View>
+                            {loading ? (
+                                <ActivityIndicator size="large" color="#0000ff" />
+                            ) : (
+                                <FlatList
+                                    data={modalData}  
+                                    renderItem={renderItems}
+                                    horizontal
+                                    showsHorizontalScrollIndicator={false}
+                                />
+                            )}
+                        </View>
                     </LinearGradient>
-                    <View>
-                        {loading ? (
-                            <ActivityIndicator size="large" color="#0000ff" />
-                        ) : (
-                            <FlatList
-                                data={modalData}
-                                renderItem={renderItems}
-                                horizontal
-                                showsHorizontalScrollIndicator={false}
-                            />
-                        )}
-                    </View>
                 </ScrollView>
             </SafeAreaProvider>
         </>
@@ -172,7 +211,6 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.bgColorsgreen,
         borderRadius: 10,
         padding: 10,
-
     },
     scrollContainer: {
         flexDirection: 'row',
@@ -188,7 +226,6 @@ const styles = StyleSheet.create({
         borderColor: 'lightgrey',
         marginBottom: 15,
         marginHorizontal: 15,
-
     },
     guideText: {
         color: '#fff',
@@ -207,7 +244,6 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         marginHorizontal: 15,
         alignItems: 'center',
-
     },
     PrestationText1: {
         color: '#fff',
@@ -215,12 +251,6 @@ const styles = StyleSheet.create({
         fontFamily: 'TimesNewRoman',
         margin: 6,
         flex: 1,
-    },
-    PrestationText2: {
-        marginLeft: 10,
-        color: '#fff',
-        fontSize: 20,
-        fontFamily: 'TimesNewRoman',
     },
     item: {
         backgroundColor: Colors.white,
@@ -242,14 +272,11 @@ const styles = StyleSheet.create({
         height: 150,
         borderRadius: 10,
         marginBottom: 10,
-
     },
-
     itemTxt: {
         fontSize: 16,
         fontFamily: 'TimesNewRomanBold',
         fontWeight: 'bold',
-        // marginVertical:15
     },
     itemDescript: {
         fontFamily: 'TimesNewRomanBold',
@@ -262,4 +289,4 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginVertical: 5,
     },
-})
+});

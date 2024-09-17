@@ -1,65 +1,92 @@
-import { FlatList, ListRenderItem, StyleSheet, Text, TouchableOpacity, View, Image, ActivityIndicator } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, memo } from 'react';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View, Image, ActivityIndicator } from 'react-native';
+import axios from 'axios';
 import { ListingType } from '@/types/listingType';
 import Colors from '@/constants/Colors';
 import { Link } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 type Props = {
-  listings: ListingType[];
-  selectedCategory: { id: string; destination: string; };
+  selectedCategory: { id: number; libelle: string; };
 };
 
-const Listings = ({ listings, selectedCategory }: Props) => {
+const Listings = ({ selectedCategory }: Props) => {
   const [filteredListings, setFilteredListings] = useState<ListingType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    setIsLoading(true);  // Start loading
-    setTimeout(() => {  // Simulate a network request or any async operation
-      if (selectedCategory && selectedCategory.id) {
-        const filtered = listings.filter(item => item.categoryId === selectedCategory.id);
-        setFilteredListings('filtre', filtered);
-        console.log(setFilteredListings);
-      } else {
-        setFilteredListings(listings);
+    const fetchData = async () => {
+      setIsLoading(true);  // Start loading
+      try {
+        const response = await axios.get('https://api.mahanaiim.ci/api/client/liste-des-categories');
+        const categories = response.data.resultat.categories;  // Extraire le tableau `categories` de la réponse
+        let produits = [];
+
+        categories.forEach(category => {
+          if (category.sous_categories) {
+            category.sous_categories.forEach(sous_categorie => {
+              if (sous_categorie.villes) {
+                sous_categorie.villes.forEach(ville => {
+                  if (ville.id === selectedCategory.id) {
+                    produits = produits.concat(ville.produits);
+                  }
+                });
+              }
+            });
+          }
+        });
+
+        setFilteredListings(produits);
+      } catch (error) {
+        console.error('Erreur lors de la récupération des annonces:', error);
       }
       setIsLoading(false);  // End loading
-    }, 1000);  // You can adjust the delay as needed
-  }, [selectedCategory, listings]);
+    };
 
-  const renderItems: ListRenderItem<ListingType> = ({ item }) => (
+    fetchData();
+  }, [selectedCategory]);
+
+  const renderItems = useCallback(({ item }) => (
     <Link href={`/listing/${item.id}`} asChild>
       <TouchableOpacity>
         <View style={styles.item}>
-          <Image source={{ uri: item.image }} style={styles.image} />
+          <Image source={{ uri: `https://api.mahanaiim.ci/backend/public/fichiers/${item.image}` }} style={styles.image} />
           <View style={styles.iconView}>
-            <Image source={{ uri: item.icon }} style={styles.icon} />
+            <Image source={{ uri: `https://api.mahanaiim.ci/backend/public/fichiers/logo_prestataire/${item.logo_prestataire}` }} style={styles.icon} />
           </View>
-          <Text style={styles.itemTxt} numberOfLines={1} ellipsizeMode="tail">{item.name}</Text>
-          <Text style={styles.itemDescript}>{item.description}</Text>
-          <Text style={styles.itemPrice}>{item.price} fcfa/Kg</Text>
+          <View style={{flexDirection:'row', paddingBottom:10}}>
+            <Ionicons name="person" size={20} color="#8b8745" style={{paddingRight:10}} />
+            <Text style={[styles.itemDescript, {textTransform: 'uppercase'}]}>{item.libelle_prestataire}</Text>
+          </View>
+          <View style={{flexDirection:'row', paddingBottom:10}}>
+            <Ionicons name="location" size={20} color="#8b8745" style={{paddingRight:10}} />
+            <Text style={[styles.itemDescript, {textTransform: 'uppercase'}]}>{item.localisation_produit}</Text>
+          </View>
+          <Text style={styles.itemTxt} numberOfLines={1} ellipsizeMode="tail">{item.libelle}</Text>
+          <Text style={styles.itemPrice}>{item.prix} fcfa</Text>
         </View>
       </TouchableOpacity>
     </Link>
-  );
+  ), []);
 
   return (
     <View style={styles.container}>
-      {isLoading ? (
+     {/*  {isLoading ? (
         <ActivityIndicator size="large" color={Colors.bgColorsgreen} />
-      ) : (
+      ) : ( */}
         <FlatList
           data={filteredListings}
           renderItem={renderItems}
+          keyExtractor={item => item.id.toString()}
           horizontal
           showsHorizontalScrollIndicator={false}
         />
-      )}
+      {/* )} */}
     </View>
   );
 };
 
-export default Listings;
+export default memo(Listings);
 
 const styles = StyleSheet.create({
   container: {
@@ -67,6 +94,20 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  iconView: {
+    position: 'absolute',
+    top: 150,
+    alignSelf: 'flex-end',
+    right: 30,
+    borderWidth: 2,
+    borderColor: Colors.white,
+    borderRadius: 25,
+  },
+  icon: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
   },
   item: {
     backgroundColor: Colors.white,
@@ -87,21 +128,7 @@ const styles = StyleSheet.create({
     width: 200,
     height: 170,
     borderRadius: 10,
-    marginBottom: 30,
-  },
-  iconView: {
-    position: 'absolute',
-    top: 150,
-    alignSelf: 'flex-end',
-    right: 30,
-    borderWidth: 2,
-    borderColor: Colors.white,
-    borderRadius: 25,
-  },
-  icon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    marginBottom: 10,
   },
   itemTxt: {
     fontSize: 16,
@@ -111,7 +138,7 @@ const styles = StyleSheet.create({
   itemDescript: {
     fontFamily: 'TimesNewRomanBold',
     fontWeight: 'bold',
-    fontSize: 14,
+    fontSize: 15,
   },
   itemPrice: {
     fontFamily: 'TimesNewRoman',

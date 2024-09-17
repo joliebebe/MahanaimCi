@@ -1,16 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, ActivityIndicator, TextInput } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import { Stack, router } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import Colors from '@/constants/Colors';
+import { Ionicons } from '@expo/vector-icons';
 
 const modalDetails = () => {
     const route = useRoute();
     const { id } = route.params;
     const [item, setItem] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [comment, setComment] = useState('');
+    const [rating, setRating] = useState(0);
+    const [commentAdded, setCommentAdded] = useState('');
+
 
     useEffect(() => {
         console.log("Component mounted with ID:", id);
@@ -42,6 +47,48 @@ const modalDetails = () => {
         }
     };
 
+    const handleValidation = () => {
+        // Valider le formulaire
+        // Vous pouvez ajouter ici la logique pour valider les informations du formulaire
+        if (!comment.trim()) {
+            alert('Veuillez saisir un commentaire.');
+            return;
+        }
+
+        if (rating === 0) {
+            alert('Veuillez sélectionner une note.');
+            return;
+        }
+
+        // Example logic to save rating and comment
+        console.log('Commentaire:', comment);
+        console.log('Note:', rating);
+
+        // You can call an API here to save the rating and comment
+
+        setCommentAdded(comment); // Enregistre le commentaire ajouté
+        setComment(''); // Réinitialise le champ de commentaire
+        setRating(0); // Réinitialise la note
+
+        // Après validation, naviguer vers l'écran HomeScreen
+        // navigation.navigate('HomeScreen');
+    };
+
+    const renderStars = () => {
+        const stars = [];
+        for (let i = 1; i <= 5; i++) {
+            stars.push(
+                <TouchableOpacity key={i} onPress={() => setRating(i)}>
+                    <Ionicons
+                        name={rating >= i ? 'star' : 'star-outline'}
+                        size={24}
+                        color={rating >= i ? '#FFD700' : '#ccc'}
+                    />
+                </TouchableOpacity>
+            );
+        }
+        return stars;
+    };
     if (loading) {
         return <ActivityIndicator size="large" color="#0000ff" />;
     }
@@ -53,18 +100,13 @@ const modalDetails = () => {
             </View>
         );
     }
-    const handleValidation = () => {
-        // Valider le formulaire
-        // Vous pouvez ajouter ici la logique pour valider les informations du formulaire
-
-        // Après validation, naviguer vers l'écran HomeScreen
-        // navigation.navigate('HomeScreen');
-    };
 
     return (
         <>
             <Stack.Screen
+
                 options={{
+
                     headerTransparent: true,
                     headerTitle: "",
                     headerLeft: () => (
@@ -79,8 +121,8 @@ const modalDetails = () => {
             <ScrollView contentContainerStyle={styles.container}>
                 {item.image ? (
                     <Image
-                    source={{ uri: `https://api.mahanaiim.ci/backend/public/fichiers/${item.image}` }}
-                    style={styles.headerImage}
+                        source={{ uri: `https://api.mahanaiim.ci/backend/public/fichiers/${item.image}` }}
+                        style={styles.headerImage}
                     />
                 ) : (
                     <View style={styles.placeholderImage}>
@@ -91,7 +133,6 @@ const modalDetails = () => {
                     <View style={styles.infoContainer}>
                         <Text style={styles.placeText}>{item.libelle}</Text>
                         <Text style={styles.priceText}>{item.prix} FCFA</Text>
-
                     </View>
                     <Text style={styles.titreText}>Description</Text>
                     <Text style={styles.descriptionText}>{item.description}</Text>
@@ -102,6 +143,30 @@ const modalDetails = () => {
                         <TouchableOpacity style={styles.validationButton} onPress={handleValidation}>
                             <Text style={styles.validationButtonText}>SOLLICITER SUR WHATSAPP </Text>
                         </TouchableOpacity>
+                    </View>
+                    {/* Formulaire de commentaire */}
+                    <View style={styles.commentContainer}>
+                    <View style={styles.ratingContainer}>
+                            <Text style={styles.ratingText}>Votre note :</Text>
+                            {renderStars()}
+                        </View>
+                        <TextInput
+                            style={styles.commentInput}
+                            placeholder="Ajouter un commentaire..."
+                            value={comment}
+                            onChangeText={text => setComment(text)}
+                        />
+                        
+                        <TouchableOpacity style={styles.submitButton} onPress={handleValidation}>
+                            <Text style={styles.submitButtonText}>Envoyer</Text>
+                        </TouchableOpacity>
+                        {/* Afficher le commentaire ajouté */}
+    {commentAdded ? (
+        <View style={styles.commentAddedContainer}>
+            <Text style={styles.commentAddedText}>Commentaire reçu :</Text>
+            <Text>{commentAdded}</Text>
+        </View>
+    ) : null}
                     </View>
                 </View>
             </ScrollView>
@@ -116,21 +181,11 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     headerImage: {
-        //flex: 1,
         width: '100%',
         height: 200,
         justifyContent: 'center',
         alignItems: 'center',
         resizeMode: 'cover',
-    },
-    darkOverlay: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-    },
-    backButton: {
-        position: 'absolute',
-        top: 40,
-        left: 20,
     },
     contentContainer: {
         flex: 2,
@@ -153,14 +208,12 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: '#63f345',
         fontFamily: 'TimesNewRoman',
-
     },
     titreText: {
         fontSize: 20,
         marginBottom: 20,
         color: '#63f345',
         fontFamily: 'TimesNewRomanBold',
-
     },
     descriptionText: {
         fontSize: 16,
@@ -170,8 +223,6 @@ const styles = StyleSheet.create({
     },
     position: {
         flexDirection: 'row',
-        // marginHorizontal:10,
-
     },
     validationButton: {
         backgroundColor: '#8b8745',
@@ -179,7 +230,6 @@ const styles = StyleSheet.create({
         paddingVertical: 15,
         borderRadius: 15,
         marginLeft: 10,
-
     },
     validationButtonText: {
         color: '#fff',
@@ -199,4 +249,47 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
+    commentContainer: {
+        marginTop: 20,
+    },
+    commentInput: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        padding: 10,
+        borderRadius: 10,
+        marginBottom: 10,
+    },
+    submitButton: {
+        backgroundColor: '#8b8745',
+        paddingVertical: 15,
+        borderRadius: 15,
+        alignItems: 'center',
+    },
+    submitButtonText: {
+        color: '#fff',
+        fontFamily: 'TimesNewRomanBold',
+        fontSize: 16,
+    },
+    ratingContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 10,
+    },
+    ratingText: {
+        marginRight: 10,
+        fontSize: 16,
+    },
+    commentAddedContainer: {
+        marginTop: 10,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        padding: 10,
+        borderRadius: 10,
+    },
+    commentAddedText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 5,
+    },
+    
 });

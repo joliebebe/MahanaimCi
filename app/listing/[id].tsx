@@ -1,49 +1,92 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, Image, ScrollView } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, Image, ActivityIndicator, ToastAndroid } from 'react-native';
 import { useLocalSearchParams, Stack, router } from 'expo-router';
-import listingsData from '@/assets/data/details.json';
-import { Feather, MaterialIcons } from '@expo/vector-icons';
-import Colors from '@/constants/Colors';
+import { Feather, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import Listings from '@/components/Listings';
 import { useCart } from '@/context/CartContext';
 import { CartItemType } from '@/types/cardItemType';
 import Animated from 'react-native-reanimated';
 import { useHeaderHeight } from '@react-navigation/elements';
+import axios from 'axios';
+import Listings from '@/components/Listings';
+import Colors from '@/constants/Colors';
+import ToastAjoute from '@/components/toastjoute';
+import ToastRetirer from '@/components/toastRetirer';
 
 const ListingDetails = () => {
   const headerHeight = useHeaderHeight();
   const { id } = useLocalSearchParams();
   const navigation = useNavigation();
-  const { addItemToCart, removeItemFromCart, cart } = useCart();
+  const { addItemToCart, removeItemFromCart } = useCart();
   const [item, setItem] = useState<CartItemType | null>(null);
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [isCartEmpty, setIsCartEmpty] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+  const [showAddToast, setShowAddToast] = useState(false);
+  const [showRemoveToast, setShowRemoveToast] = useState(false);
 
   useEffect(() => {
-    const foundItem = listingsData.find((item) => item.id === id);
-    if (foundItem) {
-      setItem(foundItem);
-      setQuantity(foundItem.quantity || 1);
-      setTotalPrice(foundItem.price * (foundItem.quantity || 1));
-      setSelectedCategory(foundItem.categories); // Mise à jour de la catégorie sélectionnée
-    } else {
-      console.log('error');
+    const fetchDetails = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get('https://api.mahanaiim.ci/api/client/liste-des-categories');
+        const categories = response.data.resultat.categories;
+        let foundItem = null;
+
+        categories.forEach((category) => {
+          if (category.produits) {
+            category.produits.forEach((product) => {
+              if (product.id === parseInt(id)) {
+                foundItem = product;
+                setSelectedCategory(category.libelle);
+              }
+            });
+          }
+        });
+
+        if (foundItem) {
+          setItem(foundItem);
+          setQuantity(1);
+          setTotalPrice(foundItem.prix);
+          setIsButtonDisabled(foundItem.prix === 0);
+        }
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching details:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchDetails();
     }
   }, [id]);
 
   const handleIncrement = () => {
-    setQuantity(quantity + 1);
-    setTotalPrice(totalPrice + (item?.price || 0));
+    setQuantity(prevQuantity => {
+      const newQuantity = prevQuantity + 1;
+      const newTotalPrice = (item?.prix || 0) * newQuantity;
+      setTotalPrice(newTotalPrice);
+      setIsButtonDisabled(newTotalPrice === 0);
+      return newQuantity;
+    });
   };
 
   const handleDecrement = () => {
-    if (quantity > 1) {
-      setQuantity(quantity - 1);
-      setTotalPrice(totalPrice - (item?.price || 0));
-    }
+    setQuantity(prevQuantity => {
+      if (prevQuantity > 0) {
+        const newQuantity = prevQuantity - 1;
+        const newTotalPrice = (item?.prix || 0) * newQuantity;
+        setTotalPrice(newTotalPrice);
+        setIsButtonDisabled(newTotalPrice === 0);
+        return newQuantity;
+      }
+      return prevQuantity;
+    });
   };
 
   const handleAddToCart = () => {
@@ -51,54 +94,80 @@ const ListingDetails = () => {
       const itemWithQuantity: CartItemType = { ...item, quantity };
       addItemToCart(itemWithQuantity, quantity);
       setIsCartEmpty(false);
+      //ToastAndroid.show('Ajouté au panier: ' + item.libelle, ToastAndroid.SHORT);
+      setShowAddToast(true);
+      setTimeout(() => {
+        setShowAddToast(false);
+      }, 3000); // Afficher le toast d'ajout pendant 3 secondes
     }
   };
 
   const handleRemoveFromCart = () => {
     if (item) {
       removeItemFromCart(item.id);
-      setQuantity(1); // Réinitialiser la quantité
-      setTotalPrice(0); // Réinitialiser le prix total
-      setIsCartEmpty(true); // Mettre à jour l'état du panier
+      setQuantity(1);
+      setTotalPrice(0);
+      setIsCartEmpty(true);
+      setIsButtonDisabled(true);
+      // ToastAndroid.show('Retiré du panier: ' + item.libelle, ToastAndroid.SHORT);
+      setShowRemoveToast(true);
+      setTimeout(() => {
+        setShowRemoveToast(false);
+      }, 3000); // Afficher le toast de retrait pendant 3 secondes
     }
   };
 
   const handleNavigation = () => {
-    navigation.navigate('shopping'); // Passer le panier comme paramètre de navigation
+    navigation.navigate('shopping');
     setIsCartEmpty(false);
   };
 
-  console.log('item:', item);
-  console.log('quantity:', quantity);
-  console.log('totalPrice:', totalPrice);
-  console.log('selectedCategory:', selectedCategory);
-  console.log('isCartEmpty:', isCartEmpty);
-
-  if (!item) {
-    return <Text>Aucun élément correspondant trouvé pour l'ID {id}</Text>;
+  if (loading) {
+    return <ActivityIndicator size="large" color="#0000ff" style={styles.loadingIndicator} />;
   }
 
   return (
     <>
       <Stack.Screen
         options={{
-          // Existing header options
+          headerTransparent: true,
+          headerTitle: "",
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()} style={{ backgroundColor: "rgba(225, 225, 225, 0.5)", borderRadius: 10, padding: 4 }} >
+              <View style={{ backgroundColor: Colors.white, padding: 6, borderRadius: 10 }} >
+                <Feather name='arrow-left' size={20} />
+              </View>
+            </TouchableOpacity>
+          )
         }}
       />
+
       <View style={styles.container}>
+
         <Animated.ScrollView>
           <Image
-            source={{ uri: item.image }}
+            source={{ uri: `https://api.mahanaiim.ci/backend/public/fichiers/${item.image}` }}
             style={[styles.headerImage, { paddingTop: headerHeight }]}
           />
+
+          <View style={styles.toastContainer}>
+            {showAddToast && <ToastAjoute />}
+            {showRemoveToast && <ToastRetirer />}
+          </View>
+
           <View style={styles.contentContainer}>
+
             <View style={styles.infoContainer}>
-              <Text style={styles.placeText}>{item.name}{'\n'}
-                <Text style={styles.placeTextCategorie}>{item.categories}</Text>
+              <Text style={styles.placeText}>{item.libelle}{'\n'}
+                <Text style={styles.placeTextCategorie}>{selectedCategory}</Text>
               </Text>
-              <Text style={styles.priceText}>{item.price} fcfa/kg</Text>
+              <Text style={styles.priceText}>{item.prix} fcfa/kg</Text>
             </View>
-            <Text style={styles.placeTextDestination}>{item.destination}, {item.destinationDetails}</Text>
+
+            <View style={{ flexDirection: 'row', paddingBottom: 10, alignSelf:'center' }}>
+              <Ionicons name="location" size={24} color="#63f345" style={{ paddingRight: 10 }} />
+              <Text style={styles.state}>{item.localisation_produit}</Text>
+            </View>
 
             <View style={styles.quantityWrapper}>
               <Text style={styles.quantityText}>Quantité</Text>
@@ -122,7 +191,11 @@ const ListingDetails = () => {
             </Text>
 
             {isCartEmpty ? (
-              <TouchableOpacity style={styles.validationButton} onPress={handleAddToCart}>
+              <TouchableOpacity
+                style={[styles.validationButton, isButtonDisabled && styles.disabledButton]}
+                onPress={handleAddToCart}
+                disabled={isButtonDisabled}
+              >
                 <Text style={styles.validationButtonText}>Ajouter au panier {totalPrice} fcfa</Text>
               </TouchableOpacity>
             ) : (
@@ -130,26 +203,42 @@ const ListingDetails = () => {
                 <Text style={styles.validationButtonText}>Retirer du panier {totalPrice} fcfa</Text>
               </TouchableOpacity>
             )}
+
             <TouchableOpacity onPress={handleNavigation}>
               <Text style={styles.lienPanier}>Aller à mon panier</Text>
             </TouchableOpacity>
             <Text style={styles.autreProd}>
               AUTRE PRODUITS
             </Text>
-            <Listings listings={listingsData} selectedCategory={selectedCategory} />
+            <Listings selectedCategory={{ id: parseInt(id), libelle: selectedCategory }} />
           </View>
         </Animated.ScrollView>
       </View>
+
+
     </>
   );
 };
-
 
 export default ListingDetails;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#fff',
+  },
+  toastContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1,
+    alignItems: 'center',
+  },
+  loadingIndicator: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   headerImage: {
     width: '100%',
@@ -196,6 +285,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'TimesNewRomanBold',
     color: Colors.bgColorsprice,
+  },
+  state: {
+    fontSize: 24,
+    fontFamily: 'TimesNewRomanBold',
+    color: Colors.bgColorsprice,
+    textAlign: 'center',
   },
   priceText: {
     fontSize: 18,
@@ -265,5 +360,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     padding: 10,
     marginHorizontal: 5,
+  },
+  disabledButton: {
+    backgroundColor: '#ccc',
   },
 });

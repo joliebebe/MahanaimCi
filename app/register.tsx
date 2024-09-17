@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View , ScrollView} from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
@@ -47,68 +47,71 @@ const Page = () => {
       <View style={styles.container2}>
         <Text style={styles.title}>Créez votre compte</Text>
         <Text style={styles.comment}>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor</Text>
-        <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <MaterialIcons name="person" size={24} color="black" style={styles.icon} />
-            <TextInput
-              placeholder="Nom"
-              style={styles.input}
-              value={nom}
-             // onChangeText={setNom}
-              onChangeText={(text) => setNom(text.toUpperCase())}
-            />
+        <ScrollView>
+          <View style={styles.form}>
+            <View style={styles.inputContainer}>
+              <MaterialIcons name="person" size={24} color="black" style={styles.icon} />
+              <TextInput
+                placeholder="Nom"
+                style={styles.input}
+                value={nom}
+                // onChangeText={setNom}
+                onChangeText={(text) => setNom(text.toUpperCase())}
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <MaterialIcons name="person" size={24} color="black" style={styles.icon} />
+              <TextInput
+                placeholder="Prenom"
+                style={styles.input}
+                value={prenom}
+                // onChangeText={setPrenom}
+                onChangeText={(text) => setPrenom(text.toUpperCase())}
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <MaterialIcons name="call" size={24} color="black" style={styles.icon} />
+              <TextInput
+                placeholder="+225 0707070707"
+                style={styles.input}
+                value={telephone}
+                onChangeText={setTelephone}
+                keyboardType="numeric"
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <MaterialIcons name="email" size={24} color="black" style={styles.icon} />
+              <TextInput
+                placeholder="E-mail"
+                style={styles.input}
+                value={email}
+                onChangeText={setEmail}
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <MaterialIcons name="lock" size={24} color="black" style={styles.icon} />
+              <TextInput
+                placeholder="Mot de passe"
+                secureTextEntry={!passwordVisible}
+                style={styles.input}
+                value={password}
+                onChangeText={setPassword}
+              />
+              <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)}>
+                <MaterialIcons name={passwordVisible ? 'visibility' : 'visibility-off'} size={24} color="black" />
+              </TouchableOpacity>
+            </View>
           </View>
-          <View style={styles.inputContainer}>
-            <MaterialIcons name="person" size={24} color="black" style={styles.icon} />
-            <TextInput
-              placeholder="Prenom"
-              style={styles.input}
-              value={prenom}
-             // onChangeText={setPrenom}
-              onChangeText={(text) => setPrenom(text.toUpperCase())}
-            />
-          </View>
-          <View style={styles.inputContainer}>
-            <MaterialIcons name="call" size={24} color="black" style={styles.icon} />
-            <TextInput
-              placeholder="Numero de téléphone"
-              style={styles.input}
-              value={telephone}
-              onChangeText={setTelephone}
-              keyboardType="numeric"
-            />
-          </View>
-          <View style={styles.inputContainer}>
-            <MaterialIcons name="email" size={24} color="black" style={styles.icon} />
-            <TextInput
-              placeholder="E-mail"
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-            />
-          </View>
-          <View style={styles.inputContainer}>
-            <MaterialIcons name="lock" size={24} color="black" style={styles.icon} />
-            <TextInput
-              placeholder="Mot de passe"
-              secureTextEntry={!passwordVisible}
-              style={styles.input}
-              value={password}
-              onChangeText={setPassword}
-            />
-            <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)}>
-              <MaterialIcons name={passwordVisible ? 'visibility' : 'visibility-off'} size={24} color="black" />
+          <View style={styles.position}>
+            <TouchableOpacity style={styles.validationButton} onPress={handleValidation}>
+              <Text style={styles.validationButtonText}>S'INSCRIRE</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleLogin}>
+              <Text style={styles.lienText}>Vous avez déjà un compte?</Text>
             </TouchableOpacity>
           </View>
-        </View>
-        <View style={styles.position}>
-          <TouchableOpacity onPress={handleLogin}>
-            <Text style={styles.lienText}>Vous avez déjà un compte?</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.validationButton} onPress={handleValidation}>
-            <Text style={styles.validationButtonText}>S'INSCRIRE</Text>
-          </TouchableOpacity>
-        </View>
+        </ScrollView>
+
       </View>
     </SafeAreaProvider>
   );
@@ -125,12 +128,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignItems: 'center',
     marginVertical: 30,
-    paddingVertical: 50,
+    paddingVertical: 30,
   },
   container2: {
     flex: 1,
+    justifyContent: 'flex-end',
     textAlign: 'center',
-    justifyContent: 'center',
+    //justifyContent: 'center',
     backgroundColor: Colors.white,
     borderTopLeftRadius: 50,
     borderTopRightRadius: 50,
@@ -172,7 +176,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   lienText: {
-    marginBottom: 20,
+    margin: 10,
     alignSelf: 'center',
     color: Colors.bgColorslink,
   },
@@ -189,7 +193,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   position: {
-    flex: 2,
+    flex: 1,
     justifyContent: 'flex-end',
   },
 });

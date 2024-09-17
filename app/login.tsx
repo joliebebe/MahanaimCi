@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
@@ -9,8 +9,8 @@ import { UserContext } from '@/context/UserContext';
 
 const Page = () => {
     const navigation = useNavigation();
-    const { setUser } = useContext(UserContext);
-    const [login_user, setLogin_user] = useState('');
+    const { setUser, setToken } = useContext(UserContext);
+    const [telephone, setLogin_user] = useState('');
     const [password_user, setPassword_user] = useState('');
     const [passwordVisible, setPasswordVisible] = useState(false);
 
@@ -20,14 +20,16 @@ const Page = () => {
 
     const handleValidation = async () => {
         try {
-            console.log('Tentative de connexion avec:', { login_user, password_user });
+            console.log('Tentative de connexion avec:', { telephone, password_user });
             const response = await axios.post('https://api.mahanaiim.ci/api/auth/login-client', {
-                login_user,
+                telephone,
                 password_user,
             });
             console.log('Réponse de l\'API:', response.data);
             if (response.data.status === 'success') {
-                setUser(response.data.result); // Stocker les informations utilisateur dans le contexte
+                const { result, accessToken } = response.data;
+                setUser(result); // Mettre à jour les informations utilisateur dans le contexte
+                setToken(accessToken); // Mettre à jour le token dans le contexte
                 navigation.navigate('(tabs)');
             } else {
                 alert(response.data.message);
@@ -37,7 +39,6 @@ const Page = () => {
             alert('Erreur de connexion');
         }
     };
-
     return (
         <SafeAreaProvider style={styles.container}>
             <View style={styles.container1}>
@@ -45,13 +46,14 @@ const Page = () => {
             </View>
             <View style={styles.container2}>
                 <Text style={styles.title}>Connectez-vous</Text>
+                <ScrollView>
                 <View style={styles.form}>
                     <View style={styles.inputContainer}>
                         <MaterialIcons name="call" size={24} color="black" style={styles.icon} />
                         <TextInput
                             placeholder="Numero de téléphone"
                             style={styles.input}
-                            value={login_user}
+                            value={telephone}
                             onChangeText={setLogin_user}
                             keyboardType="numeric"
                         />
@@ -71,13 +73,15 @@ const Page = () => {
                     </View>
                 </View>
                 <View style={styles.position}>
-                    <TouchableOpacity onPress={handleRegister}>
-                        <Text style={styles.lienText}>Créez un compte</Text>
-                    </TouchableOpacity>
                     <TouchableOpacity style={styles.validationButton} onPress={handleValidation}>
                         <Text style={styles.validationButtonText}>SE CONNECTER</Text>
                     </TouchableOpacity>
+                    <TouchableOpacity onPress={handleRegister}>
+                        <Text style={styles.lienText}>Créez un compte</Text>
+                    </TouchableOpacity>
                 </View>
+                </ScrollView>
+               
             </View>
         </SafeAreaProvider>
     );
@@ -151,12 +155,11 @@ const styles = StyleSheet.create({
         paddingVertical: 30,
     },
     position: {
-        flex: 2,
+        flex: 1,
         justifyContent: 'flex-end',
-        paddingBottom: 50,
     },
     lienText: {
-        marginBottom: 20,
+        margin: 10,
         alignSelf: 'center',
         color: Colors.bgColorslink,
     },
