@@ -207,7 +207,7 @@ const DropdownMenu = () => {
                         onChangeText={updateSearch}
                         showLoading={false}
                         round={true}
-                        inputStyle={{ fontStyle: 'TimesNewRomanBold', color: '#fff', backgroundColor: Colors.bgColorsgreen, borderColor: Colors.bgColorsgreen }}
+                        inputStyle={{ fontFamily: 'TimesNewRomanBold', color: '#fff', backgroundColor: Colors.bgColorsgreen, borderColor: Colors.bgColorsgreen }}
                         errorStyle={{ color: 'red' }}
                         inputContainerStyle={{ backgroundColor: Colors.bgColorsgreen }}
                         placeholderTextColor={'#fff'}
