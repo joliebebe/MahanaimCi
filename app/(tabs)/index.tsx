@@ -51,12 +51,11 @@ const Page = () => {
                         style={styles.image}
                     />
                     <Text style={styles.itemTxt} numberOfLines={1} ellipsizeMode="tail">{item.libelle}</Text>
-                    <Text style={styles.itemPrice}>{item.prix}</Text>
+                    <Text style={styles.itemPrice}>{item.valeur}</Text>
                 </View>
             </TouchableOpacity>
         </Link>
     );
-    const [showDropdown, setShowDropdown] = useState(false);
 
     const handleCategoryChange = (category: string) => {
         console.log("Selected category:", category);
@@ -86,7 +85,7 @@ const Page = () => {
                             </View>
                             <View style={{ flexDirection: 'row', marginHorizontal: 15, alignItems: 'center' }}>
                                 <View style={{ flex: 1 }}>
-                                    <Text style={styles.titre}>Akwaba, {user && user.nom ? <Text style={styles.titre}>{user.nom}</Text> : ""} {'\n'}sur le marché{'\n'}MAHANAIIM.CI</Text>
+                                    <Text style={styles.titre}>Bienvenue, {user && user.nom ? <Text style={styles.titre}>{user.nom}</Text> : ""} {'\n'}sur le marché{'\n'}MAHANAIIM.CI</Text>
                                 </View>
                                 <View style={styles.iconContainer}>
                                     {selectedImage ? (
@@ -112,10 +111,9 @@ const Page = () => {
                         </View>
                         <View style={styles.Prestation}>
                             <Text style={styles.PrestationText1}>Prestation Pro</Text>
-                            {/* <Text style={styles.PrestationText2}>Plus</Text> */}
                         </View>
                         <View style={{ margin: 5, marginHorizontal: 15, marginBottom: 20 }}>
-                            <Text style={{ fontFamily: 'TimesNewRoman', fontSize: 20 }}>
+                            <Text style={{ fontFamily: 'TimesNewRomanBold', fontSize: 20 }}>
                                 Nous envoyons des professionnels à votre porte, selon votre delai et votre budget
                             </Text>
                         </View>
@@ -263,9 +261,10 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
     itemPrice: {
-        fontFamily: 'TimesNewRoman',
-        color: '#63f446',
-        fontSize: 16,
+        fontWeight: 'bold',
+        fontFamily: 'TimesNewRomanBold',
+        color: Colors.bgColorsprice,
+        fontSize: 14,
         marginVertical: 5,
     },
 })

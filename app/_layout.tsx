@@ -28,6 +28,7 @@ export default function RootLayout() {
   const [loaded, error] = useFonts({
     TimesNewRoman: require('../assets/fonts/timesNewRoman.ttf'),
     TimesNewRomanBold: require('../assets/fonts/timesnewromanbold.ttf'),
+    Mono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
   });
 
@@ -71,8 +72,8 @@ const navigation = useNavigation();
         <ImageProvider>
           <Stack>
             <Stack.Screen name='login' options={{ headerShown: false }} />
-            <Stack.Screen name='PasswordRemove' options={{ headerTitle: 'Mot de passe oublié', headerLeft: () => (<TouchableOpacity onPress={() => navigation.goBack()} style={{ backgroundColor: "rgba(255, 255, 255, 1)", borderRadius: 10, padding: 4, margin:10 }}><FontAwesome5 name="arrow-left" size={20} color="#8b8745" /></TouchableOpacity>), }} />
-            <Stack.Screen name='whatappForm' options={{ headerTitle: 'Solliciter sur whatsapp', headerLeft: () => (<TouchableOpacity onPress={() => navigation.goBack()} style={{ backgroundColor: "rgba(255, 255, 255, 1)", borderRadius: 10, padding: 4, margin:10 }}><FontAwesome5 name="arrow-left" size={20} color="#8b8745" /></TouchableOpacity>), }} />
+            <Stack.Screen name='PasswordRemove' options={{ headerTitle: 'Mot de passe oublié', headerTitleStyle:{fontFamily:'TimesNewRomanBold', fontSize:18, color:'#8b8745'}, headerLeft: () => (<TouchableOpacity onPress={() => navigation.goBack()} style={{ backgroundColor: "rgba(255, 255, 255, 1)", borderRadius: 10, padding: 4, margin:10 }}><FontAwesome5 name="arrow-left" size={20} color="#8b8745" /></TouchableOpacity>), }} />
+            <Stack.Screen name='whatappForm' options={{ headerTitle: 'Solliciter sur whatsapp',headerTitleStyle:{fontFamily:'TimesNewRomanBold', fontSize:18, color:'#8b8745'}, headerLeft: () => (<TouchableOpacity onPress={() => navigation.goBack()} style={{ backgroundColor: "rgba(255, 255, 255, 1)", borderRadius: 10, padding: 4, margin:10 }}><FontAwesome5 name="arrow-left" size={20} color="#8b8745" /></TouchableOpacity>), }} />
             <Stack.Screen name='register' options={{ headerShown: false }} />
             <Stack.Screen name='modal/[id]' options={{ headerTitle: '',}} />
             <Stack.Screen name='listing/[id]' options={{ headerTitle: '',}} />

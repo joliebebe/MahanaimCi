@@ -91,6 +91,7 @@ const Notification = () => {
         options={{
           headerTransparent: false,
           headerTitle: "Historique des commandes",
+          headerTitleStyle:{color:'#8b8745', fontFamily:'TimesNewRomanBold'},
         }}
       />
       <SafeAreaView style={styles.container}>
@@ -121,6 +122,7 @@ const styles = StyleSheet.create({
     padding: 25,
   },
   emptyMessage: {
+    fontFamily:'TimesNewRomanBold',
     textAlign: 'center',
     marginTop: 50,
     fontSize: 13,
@@ -144,11 +146,15 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 13,
     fontWeight: 'bold',
+    fontFamily:'Mono',
+
   },
   subtitle: {
     fontSize: 12,
     color: '#7f7f7f',
     marginTop: 5,
+    fontFamily:'Mono',
+
   },
   detailsButton: {
     backgroundColor: '#8b8745',
@@ -161,5 +167,7 @@ const styles = StyleSheet.create({
   detailsButtonText: {
     color: '#fff',
     fontSize: 12,
+    fontFamily:'TimesNewRomanBold',
+
   },
 });

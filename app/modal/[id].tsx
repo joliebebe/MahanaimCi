@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, ActivityIndicator, TextInput, FlatList } from 'react-native';
+import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, ActivityIndicator, TextInput, FlatList, Alert } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import { Link, Stack, router, useNavigation } from 'expo-router';
@@ -64,7 +64,7 @@ const modalDetails = () => {
                         style={styles.image}
                     />
                     <Text style={styles.itemTxt} numberOfLines={1} ellipsizeMode="tail">{item.libelle}</Text>
-                    <Text style={styles.itemPrice}>{item.prix}</Text>
+                    <Text style={styles.itemPrice}>{item.valeur}</Text>
                 </View>
             </TouchableOpacity>
         </Link>
@@ -84,6 +84,15 @@ const modalDetails = () => {
     const handleValidation = async () => {
         if (!comment.trim() || rating === 0) {
             alert('Veuillez saisir un commentaire et une note.');
+            return;
+        }
+        if (!user || !user.accessToken) {
+            console.log("Utilisateur ou Token manquant:", user);
+            Alert.alert(
+                "Non authentifié",
+                "Vous devez être connecté pour envoyer un avis.",
+                [{ text: "OK", onPress: () => navigation.navigate('login') }]
+            );
             return;
         }
         try {
@@ -168,7 +177,8 @@ const modalDetails = () => {
                     )}
                     <View style={styles.contentContainer}>
                         <View style={styles.infoContainer}>
-                            <Text style={styles.placeText}>{item.libelle}</Text>
+                        <Text style={styles.placeText}>{item.libelle}</Text>
+                            <Text style={styles.placeText}>{item.valeur}</Text>
                         </View>
                         <Text style={styles.titreText}>Description</Text>
                         <Text style={styles.descriptionText}>{item.description}</Text>
@@ -242,7 +252,6 @@ const modalDetails = () => {
         </>
     );
 };
-
 export default modalDetails;
 
 const styles = StyleSheet.create({
@@ -298,7 +307,7 @@ const styles = StyleSheet.create({
     itemPrice: {
         fontFamily: 'TimesNewRoman',
         color: '#63f446',
-        fontSize: 16,
+        fontSize: 12,
         marginVertical: 5,
     },
     headerIconContainer: {
@@ -326,7 +335,8 @@ const styles = StyleSheet.create({
     },
     placeText: {
         fontSize: 18,
-        fontFamily: 'TimesNewRoman',
+        fontFamily: 'TimesNewRomanBold',
+        //color: Colors.bgColorsprice,
     },
     titreText: {
         fontSize: 20,

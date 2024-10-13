@@ -8,17 +8,22 @@ import { CartItemType } from '@/types/cardItemType';
 import Animated from 'react-native-reanimated';
 import { useHeaderHeight } from '@react-navigation/elements';
 import axios from 'axios';
-import Listings from '@/components/Listings';
 import Colors from '@/constants/Colors';
 import ToastAjoute from '@/components/toastjoute';
 import ToastRetirer from '@/components/toastRetirer';
 
 const ListingDetails = () => {
   const headerHeight = useHeaderHeight();
-  const { id } = useLocalSearchParams();
   const navigation = useNavigation();
   const { addItemToCart, removeItemFromCart } = useCart();
+  // Récupération des paramètres de la route
+  const { id, ville_id, categorie_id, sous_categorie_id } = useLocalSearchParams();
   const [item, setItem] = useState<CartItemType | null>(null);
+  console.log('item:', item);
+  console.log('id:', id);
+  console.log('ville_id:', ville_id);
+  console.log('categorie_id:', categorie_id);
+  console.log('sous_categorie_id:', sous_categorie_id);
   const [quantity, setQuantity] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -28,78 +33,92 @@ const ListingDetails = () => {
   const [showAddToast, setShowAddToast] = useState(false);
   const [showRemoveToast, setShowRemoveToast] = useState(false);
   const [otherProduit, setOtherProduit] = useState([]);
+  console.log("otherProduit:", otherProduit); // Vérifier la liste des autres produits
 
   useEffect(() => {
     const fetchDetails = async () => {
       setLoading(true);
+
       try {
-        const response = await axios.get('https://api.mahanaiim.ci/api/client/liste-des-categories');
-        const categories = response.data.resultat.categories;
-        let foundItem = null;
-  
-        categories.forEach((category) => {
-          if (category.produits) {
-            category.produits.forEach((product) => {
-              if (product.id === parseInt(id)) {
-                foundItem = product;
-                setSelectedCategory(category.libelle);
-              }
-            });
+        // Récupérer les produits via l'API
+        const responseProduits = await axios.get('https://api.mahanaiim.ci/api/client/liste-produit-fonction-categorie-ville', {
+          params: {
+            categorie_id: categorie_id || '',
+            ville_id: ville_id || '',
           }
         });
-  
+
+        const produitsSpecifiques = responseProduits.data.resultat;
+        console.log('Données récupérées:', produitsSpecifiques);
+
+        // Trouver le produit spécifique correspondant à l'ID
+        const foundItem = produitsSpecifiques.find(product => product.id === parseInt(id));
+        console.log('Produit trouvé:', foundItem);
+
         if (foundItem) {
+          // Mettre à jour le produit sélectionné
           setItem(foundItem);
           setQuantity(1);
           setTotalPrice(foundItem.prix);
           setIsButtonDisabled(foundItem.prix === 0);
+
+          // Mettre à jour la liste des autres produits
+          const autresProduits = produitsSpecifiques.filter(prod => prod.id !== foundItem.id);
+          setOtherProduit(autresProduits); // Remplir `otherProduit` avec les autres produits
+          console.log("Autres produits:", autresProduits);
+        } else {
+          console.error("Aucun produit trouvé avec l'ID:", id);
         }
-        setLoading(false);
       } catch (error) {
-        console.error('Error fetching details:', error);
+        console.error('Erreur lors de la récupération des détails:', error);
       } finally {
         setLoading(false);
       }
     };
-  
+
     if (id) {
       fetchDetails();
-      fetchOtherProduit();
     }
-  }, [id]);
-  
-
-  const fetchOtherProduit = async () => {
-    try {
-      const response = await axios.get('https://api.mahanaiim.ci/api/produits/liste?etat=1');
-      console.log(response.data.resultat); // Ajoutez ceci pour vérifier la structure des données
-      setOtherProduit(response.data.resultat);
-    } catch (error) {
-      console.error("Error fetching other prestations:", error);
-    }
-  };
+  }, [id, ville_id, sous_categorie_id]); // Ajouter les dépendances appropriées
 
   const renderItems = ({ item }) => {
     if (!item || !item.image) {
-      return null; // ou afficher un indicateur de chargement ou un message d'erreur
+      console.error('Item ou image non défini:', item);
+      return <Text>Produit indisponible</Text>; // Afficher un message ou un indicateur d'erreur
     }
 
     return (
-      <Link href={`/modal/${item.id}`} asChild>
+      <Link href={`/listing/${item.id}`} asChild>
         <TouchableOpacity>
           <View style={styles.item}>
-            <Image
-              source={{ uri: `https://api.mahanaiim.ci/backend/public/fichiers/${item.image}` }}
-              style={styles.image}
-            />
-            <Text style={styles.itemTxt} numberOfLines={1} ellipsizeMode="tail">{item.libelle}</Text>
-            <Text style={styles.itemPrice}>{item.prix}</Text>
+            <Image source={{ uri: `https://api.mahanaiim.ci/backend/public/fichiers/${item.image}` }} style={styles.image} />
+            <View style={styles.iconView}>
+              <Image
+                source={{ uri: `https://api.mahanaiim.ci/backend/public/fichiers/logo_prestataire/${item.logo_prestataire}` }}
+                style={styles.icon1}
+              />
+            </View>
+            <View style={{ flexDirection: 'row', paddingBottom: 20, top: 15 }}>
+              <Ionicons name="person" size={20} color="#8b8745" style={{ paddingRight: 10 }} />
+              <Text style={[styles.itemDescript, { textTransform: 'uppercase' }]}>
+                {item.libelle_prestataire}
+              </Text>
+            </View>
+            <View style={{ flexDirection: 'row', paddingBottom: 10 }}>
+              <Ionicons name="location" size={20} color="#8b8745" style={{ paddingRight: 10 }} />
+              <Text style={[styles.itemDescript, { textTransform: 'uppercase' }]}>
+                {item.localisation_produit}
+              </Text>
+            </View>
+            <Text style={styles.itemTxt} numberOfLines={1} ellipsizeMode="tail">
+              {item.libelle}
+            </Text>
+            <Text style={styles.itemPrice}>{item.prix} FCFA</Text>
           </View>
         </TouchableOpacity>
       </Link>
     );
   };
-
 
   const handleIncrement = () => {
     setQuantity(prevQuantity => {
@@ -176,22 +195,17 @@ const ListingDetails = () => {
           )
         }}
       />
-
       <ScrollView style={styles.container}>
-
         <Animated.ScrollView>
           <Image
             source={{ uri: `https://api.mahanaiim.ci/backend/public/fichiers/${item.image}` }}
             style={[styles.headerImage, { paddingTop: headerHeight }]}
           />
-
           <View style={styles.toastContainer}>
             {showAddToast && <ToastAjoute />}
             {showRemoveToast && <ToastRetirer />}
           </View>
-
           <View style={styles.contentContainer}>
-
             <View style={styles.infoContainer}>
               <Text style={styles.placeText}>{item.libelle}{'\n'}
                 <Text style={styles.placeTextCategorie}>{selectedCategory}</Text>
@@ -200,10 +214,9 @@ const ListingDetails = () => {
             </View>
 
             <View style={{ flexDirection: 'row', paddingBottom: 10, alignSelf: 'center' }}>
-              <Ionicons name="location" size={24} color="#63f345" style={{ paddingRight: 10 }} />
-              <Text style={styles.state}>{item.localisation_produit}</Text>
+              <Ionicons name="location" size={24} color="#8b8745" style={{ paddingRight: 10 }} />
+              <Text style={styles.state}>{item.localisation}</Text>
             </View>
-
             <View style={styles.quantityWrapper}>
               <Text style={styles.quantityText}>Quantité</Text>
               <View style={styles.counterContainer}>
@@ -238,20 +251,32 @@ const ListingDetails = () => {
                 <Text style={styles.validationButtonText}>Retirer du panier {totalPrice} fcfa</Text>
               </TouchableOpacity>
             )}
-
             <TouchableOpacity onPress={handleNavigation}>
               <Text style={styles.lienPanier}>Aller à mon panier</Text>
             </TouchableOpacity>
-            <Text style={styles.autreProd}>
-              AUTRE MENUS
-            </Text>
-           
-            <Listings selectedCategory={{ id: parseInt(id), libelle: selectedCategory }} />
+            <View>
+              <Text style={styles.autreProd}>
+                {item?.libelle_categorie === 'RESTO'
+                  ? 'AUTRES PLATS AU MENU'
+                  : 'AUTRES PRODUITS DISPONIBLES'}
+              </Text>
+              {otherProduit.length > 0 ? (
+                <FlatList
+                  data={otherProduit.filter(prod => prod.id !== item?.id)} // Exclure le produit sélectionné
+                  renderItem={({ item }) => renderItems({ item })}
+                  keyExtractor={(item) => item.id.toString()}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                />
+              ) : (
+                <Text>Aucun autre produit disponible.</Text>
+              )}
+            </View>
+
+
           </View>
         </Animated.ScrollView>
       </ScrollView>
-
-
     </>
   );
 };
@@ -262,6 +287,13 @@ const styles = StyleSheet.create({
   container: {
     //flex: 1,
     backgroundColor: '#fff',
+  },
+  emptyMessage: {
+    fontFamily: 'TimesNewRomanBold',
+    fontSize: 12,
+    color: '#777',
+    textAlign: 'center',
+    padding: 20,
   },
   toastContainer: {
     position: 'absolute',
@@ -293,7 +325,23 @@ const styles = StyleSheet.create({
     marginBottom: 10,
 
   },
-
+  icon1: {
+    width: 50,
+    height: 50,
+    borderRadius: 30,
+    // marginBottom: 10,
+    borderWidth: 2,
+    borderColor: '#fff',
+  },
+  iconView: {
+    position: 'absolute',
+    top: 130,
+    alignSelf: 'flex-end',
+    right: 7,
+    borderWidth: 2,
+    borderColor: '#fff',
+    borderRadius: 30,
+  },
   itemTxt: {
     fontSize: 16,
     fontFamily: 'TimesNewRomanBold',
@@ -304,10 +352,12 @@ const styles = StyleSheet.create({
     fontFamily: 'TimesNewRomanBold',
     fontWeight: 'bold',
     fontSize: 14,
+    marginVertical: 5,
+
   },
   itemPrice: {
     fontFamily: 'TimesNewRoman',
-    color: '#63f446',
+    color: Colors.bgColorsgreen,
     fontSize: 16,
     marginVertical: 5,
   },
@@ -355,30 +405,30 @@ const styles = StyleSheet.create({
   placeTextCategorie: {
     fontSize: 14,
     fontFamily: 'TimesNewRoman',
-    color: Colors.bgColorsprice,
+    color: Colors.bgColorsgreen,
   },
   placeTextDestination: {
     fontSize: 18,
     fontFamily: 'TimesNewRomanBold',
-    color: Colors.bgColorsprice,
+    color: Colors.bgColorsgreen,
   },
   state: {
     fontSize: 24,
     fontFamily: 'TimesNewRomanBold',
-    color: Colors.bgColorsprice,
+    color: Colors.bgColorsgreen,
     textAlign: 'center',
   },
   priceText: {
     fontSize: 18,
-    color: Colors.bgColorsprice,
+    color: Colors.bgColorsgreen,
     fontFamily: 'TimesNewRomanBold',
   },
   description: {
     fontSize: 16,
     marginBottom: 20,
-    fontFamily: 'TimesNewRoman',
+    fontFamily: 'TimesNewRomanBold',
     textAlign: 'justify',
-    color: Colors.bgColorsgreen,
+    color: Colors.bgColorsprice,
   },
   descriptionText: {
     fontSize: 16,

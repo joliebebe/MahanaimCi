@@ -66,6 +66,7 @@ const Page = () => {
                 options={{
                     headerTransparent: false,
                     headerTitle: "Profil",
+                    headerTitleStyle: { color: '#8b8745', fontFamily: 'TimesNewRomanBold' },
                     headerRight: () => (
                         <MaterialIcons
                             name="exit-to-app"
@@ -123,19 +124,19 @@ const Page = () => {
                     <View style={styles.form}>
                         <View style={styles.inputContainer}>
                             <Text style={styles.guideText1}>Nom</Text>
-                            <Text style={styles.guideText1}>{user && user.nom ? user.nom : ""}</Text>
+                            <Text style={styles.guideText11}>{user && user.nom ? user.nom : ""}</Text>
                         </View>
                         <View style={styles.inputContainer}>
                             <Text style={styles.guideText1}>Prénoms</Text>
-                            <Text style={styles.guideText1}>{user && user.prenom ? user.prenom : ""}</Text>
+                            <Text style={styles.guideText11}>{user && user.prenom ? user.prenom : ""}</Text>
                         </View>
                         <View style={styles.inputContainer}>
                             <Text style={styles.guideText1}>Email</Text>
-                            <Text style={styles.guideText1}>{user && user.email ? user.email : ""}</Text>
+                            <Text style={styles.guideText11}>{user && user.email ? user.email : ""}</Text>
                         </View>
                         <View style={styles.inputContainer}>
                             <Text style={styles.guideText1}>Téléphone</Text>
-                            <Text style={styles.guideText1}>{user && user.telephone ? user.telephone : ""}</Text>
+                            <Text style={styles.guideText11}>{user && user.telephone ? user.telephone : ""}</Text>
                         </View>
                     </View>
                 </View>
@@ -152,7 +153,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: '#fff',
         paddingTop: 20,
-        justifyContent: 'flex-start', 
+        justifyContent: 'flex-start',
     },
     profilePictureContainer1: {
         width: 140,
@@ -191,7 +192,7 @@ const styles = StyleSheet.create({
     },
     name: {
         fontSize: 24,
-        fontFamily: 'TimesNewRoman',
+        fontFamily: 'TimesNewRomanBold',
         marginBottom: 10,
     },
     locationContainer: {
@@ -199,8 +200,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     locationText: {
-       fontSize: 16,
-        fontFamily: 'TimesNewRoman',
+        fontSize: 16,
+        fontFamily: 'TimesNewRomanBold',
         marginRight: 5,
         color: "#8b8745",
     },
@@ -226,16 +227,23 @@ const styles = StyleSheet.create({
     },
     guideText: {
         color: '#000',
-       fontSize: 16,
-        fontFamily: 'TimesNewRoman',
+        fontSize: 16,
+        fontFamily: 'TimesNewRomanBold',
         marginTop: 6,
         alignSelf: 'center',
-        alignItems:'center'
+        alignItems: 'center'
     },
     guideText1: {
         color: '#000000',
-       fontSize: 16,
-        fontFamily: 'TimesNewRoman',
+        fontSize: 16,
+        fontFamily: 'TimesNewRomanBold',
+        margin: 6,
+        alignSelf: 'center',
+    },
+    guideText11: {
+        color: '#000000',
+        fontSize: 16,
+        fontFamily: 'Mono',
         margin: 6,
         alignSelf: 'center',
     },
@@ -243,7 +251,7 @@ const styles = StyleSheet.create({
         width: '100%',
         padding: 10,
         justifyContent: 'space-between',
-        flexDirection: 'column', 
+        flexDirection: 'column',
     },
     inputContainer: {
         flexDirection: 'row',
@@ -263,10 +271,10 @@ const styles = StyleSheet.create({
     },
     editButtonText: {
         color: '#fff',
-       fontSize: 18,
-        fontFamily: 'TimesNewRoman',
+        fontSize: 18,
+        fontFamily: 'TimesNewRomanBold',
         alignSelf: 'center',
-        textAlign:'center'
+        textAlign: 'center'
     },
     content: {
         flex: 1,

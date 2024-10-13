@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     fontSize: 19,
     color: '#000',
     textAlign: 'justify',
-    fontFamily: 'TimesNewRoman',
+    fontFamily: 'TimesNewRomanBold',
     marginVertical: 20,
     marginHorizontal: 20, 
     lineHeight: 24,

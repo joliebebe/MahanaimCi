@@ -187,6 +187,7 @@ const Shopping = () => {
         options={{
           headerTransparent: false,
           headerTitle: "Panier",
+          headerTitleStyle:{color:'#8b8745', fontFamily:'TimesNewRomanBold'},
           headerRight: () => (
             <TouchableOpacity onPress={() => handleCleanFromCart()} style={{ paddingRight: 50 }}>
               <FontAwesome name="trash" size={24} color="#8b8745" />
@@ -351,12 +352,15 @@ const styles = StyleSheet.create({
   totalText: {
     fontSize: 14,
     fontWeight: 'bold',
+    fontFamily:'TimesNewRomanBold',
     color: '#333',
   },
   priceText: {
     fontSize: 14,
     fontWeight: 'bold',
     color: '#6200ee',
+    fontFamily:'Mono',
+
   },
   separator: {
     height: 1,
@@ -375,11 +379,15 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 14,
     color: '#7f7f7f',
+    fontFamily:'TimesNewRomanBold',
+
   },
   title1: {
     fontSize: 14,
     fontWeight: 'bold',
     padding: 10,
+    fontFamily:'TimesNewRomanBold',
+
   },
   card: {
     marginBottom: 10,
@@ -403,16 +411,22 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 14,
     fontWeight: 'bold',
+    fontFamily:'TimesNewRomanBold',
+
   },
   price: {
     fontSize: 12,
     fontWeight: 'bold',
     color: '#8b8745',
+    fontFamily:'Mono',
+
   },
   quantity: {
     fontSize: 12,
     color: '#000',
     fontWeight: 'bold',
+    fontFamily:'TimesNewRomanBold',
+
   },
   validateButton: {
     backgroundColor: '#BBB65D',
@@ -425,6 +439,8 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     fontWeight: 'bold',
+    fontFamily:'TimesNewRomanBold',
+
   },
   paymentLogo: {
     width: 50,
@@ -439,6 +455,7 @@ const styles = StyleSheet.create({
   emptyCartText: {
     fontSize: 14,
     color: 'gray',
+    fontFamily:'TimesNewRomanBold',
     marginTop: 20,
   },
   continueShoppingButton: {
@@ -449,6 +466,7 @@ const styles = StyleSheet.create({
   },
   continueShoppingButtonText: {
     color: '#fff',
+    fontFamily:'TimesNewRomanBold',
     fontSize: 14,
     fontWeight: 'bold',
   },
@@ -476,6 +494,8 @@ const styles = StyleSheet.create({
   modalText: {
     marginBottom: 15,
     textAlign: 'center',
+    fontFamily:'TimesNewRomanBold',
+
   },
   modalButtons: {
     flexDirection: 'row',
@@ -491,6 +511,8 @@ const styles = StyleSheet.create({
   },
   textStyle: {
     color: 'white',
+    fontFamily:'TimesNewRomanBold',
+
     fontWeight: 'bold',
     textAlign: 'center',
   },
@@ -519,6 +541,8 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 14,
     color: '#6200ee',
+    fontFamily:'TimesNewRomanBold',
+
   },
 });
 
